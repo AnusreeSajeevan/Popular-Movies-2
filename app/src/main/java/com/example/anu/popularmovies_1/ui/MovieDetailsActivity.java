@@ -3,9 +3,12 @@ package com.example.anu.popularmovies_1.ui;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -34,6 +37,10 @@ public class MovieDetailsActivity extends AppCompatActivity {
     TextView txtReleaseDate;
     @BindView(R.id.txt_overview)
     TextView txtOverview;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+    @BindView(R.id.appbar_layout)
+    AppBarLayout appbarLayout;
 
 
     private Movie movie;
@@ -44,13 +51,41 @@ public class MovieDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_movie_details);
         ButterKnife.bind(this);
 
+        setupBackNavigation();
+
         /*
           get clicked Movie object passed from MainActivity
          */
         movie = getIntent().getParcelableExtra(MainActivity.KEY_MOVIE_RESPONSE);
 
+        /**
+         * set addOnOffsetChangedListener to appbar to indicate if it is expanded or collapsed
+         * show back button if it is collapsed, hide otherwise
+         */
+        appbarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                    int offsetAlpha = (int) (appBarLayout.getY() / appBarLayout.getTotalScrollRange());
+                    toolbar.getNavigationIcon().setAlpha(offsetAlpha);
+            }
+        });
+
         populateMovieDetails();
 
+
+    }
+
+    /**
+     * method to set back navigation to {@link MovieDetailsActivity}
+     */
+    private void setupBackNavigation() {
+            toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_left_arrow));
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    finish();
+                }
+            });
     }
 
     /**
@@ -107,7 +142,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
     }
 
 
-
     /**
      * method to generate bitmap from image
      *
@@ -115,7 +149,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
      * @return generated bitmap
      */
     public static Bitmap getBitmapFromImage(ImageView imgBackdrop) {
-       return ((BitmapDrawable) imgBackdrop.getDrawable()).getBitmap();
+        return ((BitmapDrawable) imgBackdrop.getDrawable()).getBitmap();
     }
 
     /**
@@ -131,11 +165,11 @@ public class MovieDetailsActivity extends AppCompatActivity {
              */
             @Override
             public void onGenerated(Palette palette) {
-               Palette.Swatch pSwatches1 = palette.getDarkVibrantSwatch();
-                Palette.Swatch pSwatches2  = palette.getLightVibrantSwatch();
+                Palette.Swatch pSwatches1 = palette.getDarkVibrantSwatch();
+                Palette.Swatch pSwatches2 = palette.getLightVibrantSwatch();
 
 
-                if (null !=pSwatches1 && null != pSwatches2) {
+                if (null != pSwatches1 && null != pSwatches2) {
                     collapsingToolbarLayout.setContentScrimColor(pSwatches1.getRgb());
                     collapsingToolbarLayout.setCollapsedTitleTextColor(pSwatches2.getRgb());
                 } else {
