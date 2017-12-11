@@ -20,7 +20,11 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.MovieDetailsActivity"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.MainActivity"/>
+        </activity>
 
         <!--MainActivity is treated
         as the parent of SettingsActivity and the up button is displayed
