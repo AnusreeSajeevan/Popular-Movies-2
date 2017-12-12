@@ -55,13 +55,15 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="@dimen/margin_10">
-            <LinearLayout
+            <RelativeLayout
                 android:id="@+id/layout"
                 android:orientation="vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/details_left_margin">
                 <TextView
+                    android:ellipsize="end"
+                    android:maxLines="2"
                     android:text="movie name"
                     android:textStyle="bold"
                     android:id="@+id/txt_title"
@@ -70,6 +72,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
                 <TextView
+                    android:layout_below="@+id/txt_title"
                     android:text="5"
                     android:layout_marginTop="@dimen/margin_5"
                     android:drawablePadding="@dimen/margin_5"
@@ -79,12 +82,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
                 <TextView
+                    android:id="@+id/txt_rating_label"
+                    android:layout_below="@+id/txt_rating"
                     android:text="@string/rating_hint"
                     android:textSize="@dimen/text_size_12"
                     android:textColor="@color/colorDarkBlue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
                 <TextView
+                    android:layout_below="@+id/txt_rating_label"
                     android:text="13 nov, 1995"
                     android:layout_marginTop="@dimen/margin_5"
                     android:id="@+id/txt_release_date"
@@ -92,6 +98,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
                 <TextView
+                    android:layout_below="@+id/txt_release_date"
                     android:visibility="gone"
                     android:layout_marginTop="@dimen/margin_5"
                     android:id="@+id/txt_language"
@@ -99,13 +106,16 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
                 <ToggleButton
+                    android:layout_marginLeft="@dimen/margin_5"
+                    android:layout_toRightOf="@+id/txt_rating"
+                    android:layout_below="@+id/txt_title"
                     android:textColor="@color/transparent"
-                    android:layout_marginTop="@dimen/margin_10"
+                    android:layout_marginTop="@dimen/margin_5"
                     android:background="@drawable/ic_not_favorite"
                     android:id="@+id/btn_favorites"
                     android:layout_width="@dimen/details_favorites_icon_size"
                     android:layout_height="@dimen/details_favorites_icon_size" />
-            </LinearLayout>
+            </RelativeLayout>
             <TextView
                 android:layout_below="@+id/layout"
                 android:layout_marginTop="@dimen/overview_margin_top"
