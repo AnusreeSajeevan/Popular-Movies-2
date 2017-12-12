@@ -29,6 +29,18 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:visibility="visible"/>
+
+        <TextView
+            android:textColor="@color/colorBlack"
+            android:drawablePadding="@dimen/margin_20"
+            android:textAlignment="center"
+            android:drawableTop="@drawable/ic_no_favorites"
+            android:id="@+id/tv_no_favorites"
+            android:text="@string/no_favorites_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
     </FrameLayout>
 
 

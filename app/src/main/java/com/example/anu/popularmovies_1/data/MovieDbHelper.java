@@ -5,10 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.graphics.Movie;
-import android.util.Log;
 
-import com.example.anu.popularmovies_1.R;
+import com.example.anu.popularmovies_1.utils.MovieDBUtils;
+import com.example.anu.popularmovies_1.utils.NetworkUtils;
 
 /**
  * Created by Design on 11-12-2017.
@@ -31,7 +30,7 @@ public class MovieDbHelper extends SQLiteOpenHelper{
      * will store current database version
      * initial value will be 1, and should upgrade it whenever we change database schema
      */
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     private SQLiteDatabase sqLiteDatabase;
     private Context context;
@@ -59,7 +58,14 @@ public class MovieDbHelper extends SQLiteOpenHelper{
         String CREATE_MOVIE_TABLE_QUERY = "CREATE TABLE " + MovieContract.MovieEntry.TABLE_NAME + " (" +
                 MovieContract.MovieEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 MovieContract.MovieEntry.KEY_COLUMN_MOVIE_ID + " INTEGER NOT NULL, " +
-                MovieContract.MovieEntry.KEY_COLUMN_FAVORITE + " INTEGER NOT NULL" +
+                MovieContract.MovieEntry.KEY_COLUMN_FAVORITE + " INTEGER NOT NULL, " +
+                MovieContract.MovieEntry.KEY_COLUMN_TITLE + " TEXT NOT NULL, " +
+                MovieContract.MovieEntry.KEY_COLUMN_ORIGINAL_TITLE + " TEXT NOT NULL, " +
+                MovieContract.MovieEntry.KEY_COLUMN_VOTE_AVERAGE + " REAL NOT NULL, " +
+                MovieContract.MovieEntry.KEY_COLUMN_POSTER_PATH + " TEXT NOT NULL, " +
+                MovieContract.MovieEntry.KEY_COLUMN_BACKDROP_PATH + " TEXT NOT NULL, " +
+                MovieContract.MovieEntry.KEY_COLUMN_RELEASE_DATE + " TEXT NOT NULL, " +
+                MovieContract.MovieEntry.KEY_COLUMN_OVERVIEW + " TEXT NOT NULL" +
                 "); ";
         sqLiteDatabase.execSQL(CREATE_MOVIE_TABLE_QUERY);
     }
@@ -94,11 +100,19 @@ public class MovieDbHelper extends SQLiteOpenHelper{
      * @param movieId id of the movie to be inserted
      * @param favorite will be 0, for the first time, indicating movie is not favorite
      */
-    public long addNewMovie(long movieId, int favorite){
+    public long addNewMovie(long movieId, int favorite, String title, String originalTitle, double voteAverage,
+                            String posterPath, String backdropPath, String releaseDate, String overview){
         sqLiteDatabase = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(MovieContract.MovieEntry.KEY_COLUMN_MOVIE_ID, movieId);
         contentValues.put(MovieContract.MovieEntry.KEY_COLUMN_FAVORITE, favorite);
+        contentValues.put(MovieContract.MovieEntry.KEY_COLUMN_TITLE, title);
+        contentValues.put(MovieContract.MovieEntry.KEY_COLUMN_ORIGINAL_TITLE, originalTitle);
+        contentValues.put(MovieContract.MovieEntry.KEY_COLUMN_VOTE_AVERAGE, voteAverage);
+        contentValues.put(MovieContract.MovieEntry.KEY_COLUMN_POSTER_PATH, posterPath);
+        contentValues.put(MovieContract.MovieEntry.KEY_COLUMN_BACKDROP_PATH, backdropPath);
+        contentValues.put(MovieContract.MovieEntry.KEY_COLUMN_RELEASE_DATE, releaseDate);
+        contentValues.put(MovieContract.MovieEntry.KEY_COLUMN_OVERVIEW, overview);
         return sqLiteDatabase.insert(MovieContract.MovieEntry.TABLE_NAME, null, contentValues);
     }
 
@@ -116,4 +130,15 @@ public class MovieDbHelper extends SQLiteOpenHelper{
                 MovieContract.MovieEntry.KEY_COLUMN_MOVIE_ID + " = ?", new String[]{String.valueOf(movieId)});
     }
 
+    /**
+     * method to get all user's favorite movies
+     * @return cursor containing all favorite movies
+     */
+    public Cursor getFavoiteMovies(){
+        sqLiteDatabase = getReadableDatabase();
+        String query = "SELECT * FROM " + MovieContract.MovieEntry.TABLE_NAME +
+                " WHERE " + MovieContract.MovieEntry.KEY_COLUMN_FAVORITE+ " = " + 1;
+        Cursor cursor = sqLiteDatabase.rawQuery(query,null);
+        return cursor;
+    }
 }

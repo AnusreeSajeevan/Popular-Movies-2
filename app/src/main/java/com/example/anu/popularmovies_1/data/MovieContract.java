@@ -44,5 +44,48 @@ public class MovieContract {
          * will store 1 if movie is favorite, 0 otherwise
          */
         public static final String KEY_COLUMN_FAVORITE = "favorite";
+
+        /**
+         * name of the column to store movie title
+         */
+        public static final String KEY_COLUMN_TITLE = "title";
+
+        /**
+         * name of the column to store movie original title
+         */
+        public static final String KEY_COLUMN_ORIGINAL_TITLE = "original_title";
+
+
+        /**
+         * name of the column to store vote average
+         */
+        public static final String KEY_COLUMN_VOTE_AVERAGE = "vote_average";
+
+
+        /**
+         * name of the column to store poster path
+         */
+        public static final String KEY_COLUMN_POSTER_PATH = "poster_path";
+
+         /**
+         * name of the column to store backdrop path
+         */
+        public static final String KEY_COLUMN_BACKDROP_PATH = "backdrop_path";
+
+
+
+         /**
+         * name of the column to store release date
+         */
+        public static final String KEY_COLUMN_RELEASE_DATE = "release_date";
+
+
+
+         /**
+         * name of the column to store overview
+         */
+        public static final String KEY_COLUMN_OVERVIEW = "overview";
+
+
     }
 }

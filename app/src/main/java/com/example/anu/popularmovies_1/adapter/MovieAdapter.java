@@ -17,6 +17,8 @@ import com.example.anu.popularmovies_1.R;
 import com.example.anu.popularmovies_1.data.MovieContract;
 import com.example.anu.popularmovies_1.data.MovieDbHelper;
 import com.example.anu.popularmovies_1.model.Movie;
+import com.example.anu.popularmovies_1.utils.MovieDBUtils;
+import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -58,7 +60,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieHolder> {
         holder.txtMovieName.setText(movie.getTitle());
         holder.txtRating.setText(String.valueOf(movie.getVoteAverage()));
         Picasso.with(context)
-                .load(movie.getPosterPath()).fit()
+                .load(MovieDBUtils.URL_POSTER_PATH + movie.getPosterPath()).fit()
                 .placeholder(R.drawable.ic_place_holder)
                 .error(R.drawable.ic_place_holder)
                 .into(holder.imgThumbnail);
@@ -129,9 +131,5 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieHolder> {
     @Override
     public int getItemCount() {
         return movieList.size();
-    }
-
-    public void refreshData(){
-        notifyDataSetChanged();
     }
 }

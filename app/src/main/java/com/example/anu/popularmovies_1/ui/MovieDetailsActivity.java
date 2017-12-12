@@ -21,6 +21,7 @@ import com.example.anu.popularmovies_1.adapter.MovieHolder;
 import com.example.anu.popularmovies_1.data.MovieDbHelper;
 import com.example.anu.popularmovies_1.model.Movie;
 import com.example.anu.popularmovies_1.utils.CommonUtils;
+import com.example.anu.popularmovies_1.utils.MovieDBUtils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -171,7 +172,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
           set movie poster image
          */
         Picasso.with(this)
-                .load(movie.getPosterPath())
+                .load(MovieDBUtils.URL_POSTER_PATH + movie.getPosterPath())
                 .placeholder(R.drawable.ic_place_holder)
                 .error(R.drawable.ic_place_holder)
                 .into(imgPoster);

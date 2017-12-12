@@ -4,18 +4,22 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Adapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,6 +56,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
     TextView tvError;
     @BindView(R.id.swipe_refresh_layout)
     SwipeRefreshLayout swipeRefreshLayout;
+    @BindView(R.id.tv_no_favorites)
+    TextView tvNoFavorites;
 
     private MovieAdapter movieAdapter;
     private static List<Movie> movieList = new ArrayList<>();
@@ -63,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
 
     static String KEY_MOVIE_RESPONSE = "movie_response";
     static String KEY_CLICKED_POSITION = "clicked_position";
+    static String KEY_LOAD_FAVORITE = "load_favorite";
 
     LoaderManager.LoaderCallbacks callBacks = MainActivity.this;
 
@@ -72,12 +79,19 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
     private MovieDbHelper movieDbHelper;
 
     private static final int REQUEST_CODE_DETAILS = 10;
+    private boolean loadFavorite = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        /**
+         * restore the saved data
+         */
+        if (null != savedInstanceState)
+            loadFavorite = savedInstanceState.getBoolean(KEY_LOAD_FAVORITE);
 
         movieDbHelper = new MovieDbHelper(this);
 
@@ -95,11 +109,20 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (NetworkUtils.isNetworkAvailable(MainActivity.this)){
+                if (NetworkUtils.isNetworkAvailable(MainActivity.this)) {
+                    loadFavorite = false;
                     getSupportLoaderManager().restartLoader(MOVIES_LOADER_ID, null, callBacks);
-                }
-                else {
-                    showError(getResources().getString(R.string.no_connectivity));
+                } else {
+                    Cursor cursorFavorites = movieDbHelper.getFavoiteMovies();
+                    if (cursorFavorites.getCount()==0){
+                        showError(getResources().getString(R.string.no_connectivity));
+                        loadFavorite = false;
+                    }
+                    else {
+                        loadFavorite = true;
+                        getFavorites();
+                    }
+
                 }
             }
         });
@@ -118,10 +141,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
         recyclerviewMovies.setLayoutManager(new GridLayoutManager(MainActivity.this, columnCount));
         recyclerviewMovies.setAdapter(movieAdapter);
         getSortOrderAndSetup();
-        if (NetworkUtils.isNetworkAvailable(MainActivity.this)){
+        if (NetworkUtils.isNetworkAvailable(MainActivity.this)) {
             getSupportLoaderManager().initLoader(MOVIES_LOADER_ID, bundle, callBacks);
-        }
-        else {
+        } else {
             showError(getResources().getString(R.string.no_connectivity));
         }
     }
@@ -150,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
      * set action bar title to the sort order
      */
     private void setTitle(String sortBy) {
-        if (null != getSupportActionBar()){
+        if (null != getSupportActionBar()) {
             if (sortBy.equalsIgnoreCase(getResources().getString(R.string.pref_sortby_popular_value)))
                 getSupportActionBar().setTitle(getResources().getString(R.string.pref_sortby_popular_label));
             else if (sortBy.equalsIgnoreCase(getResources().getString(R.string.pref_sortby_top_rated_value)))
@@ -161,6 +183,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
     /**
      * method over riden to redirect to {@link MovieDetailsActivity}
      * on clicking movie thumbnail
+     *
      * @param pos clicked thumbnail position
      */
     @Override
@@ -177,16 +200,15 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
 
     @Override
     public Loader<MovieResponse> onCreateLoader(int id, Bundle args) {
-        return new android.support.v4.content.AsyncTaskLoader<MovieResponse>(this) {
+        return new AsyncTaskLoader<MovieResponse>(this) {
 
             MovieResponse movieResponse = null;
 
             @Override
             protected void onStartLoading() {
-                if (movieResponse!=null){
+                if (movieResponse != null) {
                     deliverResult(movieResponse);
-                }
-                else
+                } else
                     forceLoad();
             }
 
@@ -212,9 +234,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
                         movieResponse = new Gson().fromJson(jsonObject.toString(), MovieResponse.class);
 
                         //parse and save movie id and favories to local database
-                        if (null != movieResponse){
+                        if (null != movieResponse) {
                             List<Movie> movieList = movieResponse.getResults();
-                            for (int i=0;i<movieList.size();i++){
+                            for (int i = 0; i < movieList.size(); i++) {
                                 Movie movie = movieList.get(i);
 
                                 /**
@@ -224,9 +246,11 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
                                 Cursor cursor = movieDbHelper.getMovieById(movie.getId());
 
                                 int count = cursor.getCount();  //return the cursor count
-                                if (count == 0){
+                                if (count == 0) {
                                     int favorite = 0;
-                                    movieDbHelper.addNewMovie(movie.getId(), favorite);
+                                    movieDbHelper.addNewMovie(movie.getId(), favorite, movie.getTitle(), movie.getOriginalTitle(),
+                                            movie.getVoteAverage(), movie.getPosterPath(), movie.getBackdropPath(),
+                                            movie.getReleaseDate(), movie.getOverview());
                                 }
                             }
                         }
@@ -251,40 +275,39 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
 
         recyclerviewMovies.setVisibility(View.VISIBLE);
         tvError.setVisibility(View.GONE);
+        tvNoFavorites.setVisibility(View.GONE);
 
         if (swipeRefreshLayout.isRefreshing())
             swipeRefreshLayout.setRefreshing(false);
 
-        if (null!=data){
+        if (null != data) {
             List<Movie> movies = data.getResults();
-            if (movies.size()!=0){
+            if (movies.size() != 0) {
 
-                for (int i=0;i<movies.size();i++){
+                for (int i = 0; i < movies.size(); i++) {
                     Cursor cursor = movieDbHelper.getMovieById(movies.get(i).getId());
                     int favorite;
-                    if (cursor.getCount()!=0){
+                    if (cursor.getCount() != 0) {
                         cursor.moveToFirst();
                         favorite = cursor.getInt(cursor.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_FAVORITE));
-                    }
-                    else {
+                    } else {
                         favorite = 0;
                     }
-                    Log.d("checkFavorite", "favorite : "+favorite);
                     movies.get(i).setIsFavorite(favorite);
                 }
                 movieList.addAll(movies);
                 movieAdapter.notifyDataSetChanged();
-            }
-            else {
+            } else {
                 showError(getResources().getString(R.string.err_msg));
             }
-        }else {
+        } else {
             showError(getResources().getString(R.string.err_msg));
         }
     }
 
     /**
      * method to show appropriate error message
+     *
      * @param error the error message to be shown
      */
     private void showError(String error) {
@@ -293,12 +316,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
         recyclerviewMovies.setVisibility(View.GONE);
         tvError.setText(error);
         tvError.setVisibility(View.VISIBLE);
+        tvNoFavorites.setVisibility(View.GONE);
     }
 
     /**
      * method to get determine the column count in movies list
      * based on screen orientation
      * column count = 2, for portrait, 3 for landscape
+     *
      * @return grid column count depending on the orientation
      */
     private int setColumnCount() {
@@ -344,13 +369,11 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
           and set the flag false
          */
         if (PREFERENCE_UPDATED) {
-            if (NetworkUtils.isNetworkAvailable(MainActivity.this)){
+            if (NetworkUtils.isNetworkAvailable(MainActivity.this)) {
                 getSortOrderAndSetup();
                 getSupportLoaderManager().restartLoader(MOVIES_LOADER_ID, null, callBacks);
                 PREFERENCE_UPDATED = false;
-            }
-            else
-            {
+            } else {
                 showError(getResources().getString(R.string.no_connectivity));
             }
         }
@@ -371,37 +394,94 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
                 startActivity(iSettings);
                 return true;
             case R.id.action_favorites:
+                loadFavorite = true;
                 Toast.makeText(this, getResources().getString(R.string.favorites), Toast.LENGTH_SHORT).show();
+                getFavorites();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
+    /**
+     * method to get favorite movies from local database
+     */
+    private void getFavorites() {
+        Cursor cursorFavorites = movieDbHelper.getFavoiteMovies();
+        movieList.clear();
+        movieAdapter.notifyDataSetChanged();
+        tvError.setVisibility(View.GONE);
+        if (cursorFavorites.getCount() == 0) {
+            tvNoFavorites.setVisibility(View.VISIBLE);
+        }
+        else {
+            cursorFavorites.moveToFirst();
+            for (int i=0;i<cursorFavorites.getCount();i++){
+                movieList.add(new Movie(
+                        cursorFavorites.getInt(cursorFavorites.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_MOVIE_ID)),
+                        cursorFavorites.getDouble(cursorFavorites.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_VOTE_AVERAGE)),
+                        cursorFavorites.getString(cursorFavorites.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_TITLE)),
+                        cursorFavorites.getString(cursorFavorites.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_POSTER_PATH)),
+                        cursorFavorites.getInt(cursorFavorites.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_FAVORITE)),
+                        cursorFavorites.getString(cursorFavorites.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_ORIGINAL_TITLE)),
+                        cursorFavorites.getString(cursorFavorites.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_BACKDROP_PATH)),
+                        cursorFavorites.getString(cursorFavorites.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_OVERVIEW)),
+                        cursorFavorites.getString(cursorFavorites.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_RELEASE_DATE))
+                        ));
+            }
+            movieAdapter.notifyDataSetChanged();
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
-        movieAdapter.refreshData();
+        movieAdapter.notifyDataSetChanged();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d("checkresult", "onActivityResult");
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_DETAILS){
-            Log.d("checkresult", "if 1 ");
-            if (resultCode == RESULT_OK){
-                Log.d("checkresult", "if 2 ");
-                movieAdapter.notifyDataSetChanged();
+        if (requestCode == REQUEST_CODE_DETAILS) {
+            if (resultCode == RESULT_OK) {
+               if (loadFavorite){
+                    getFavorites();
+               }
+               else {
+                   movieAdapter.notifyDataSetChanged();
 
-                Bundle bundle = data.getExtras();
-                Movie movie = bundle.getParcelable(MainActivity.KEY_MOVIE_RESPONSE);
-                int pos = bundle.getInt(KEY_CLICKED_POSITION, -1);
-                Log.d("checkresult", "pos : "+pos);
-                if (pos != -1){
-                    movieList.get(pos).setIsFavorite(movie.isFavorite());
-                }
+                   Bundle bundle = data.getExtras();
+                   Movie movie = bundle.getParcelable(MainActivity.KEY_MOVIE_RESPONSE);
+                   int pos = bundle.getInt(KEY_CLICKED_POSITION, -1);
+                   if (pos != -1) {
+                       movieList.get(pos).setIsFavorite(movie.isFavorite());
+                   }
+               }
             }
         }
     }
+
+    /**
+     * save the value of {@literal loadFavorite} here,
+     * so thet we can retrieve it in {@literal onRestoreInstanceState} when configuration changes
+     * @param outState
+     */
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(KEY_LOAD_FAVORITE, loadFavorite);
+    }
+
+    /**
+     * get the value of {@literal loadFavorite} we saved from {@literal onSaveInstanceState}
+     * so that we can load favorites/all movies correctly even after configuration change
+     * @param savedInstanceState
+     */
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (null != savedInstanceState)
+            loadFavorite = savedInstanceState.getBoolean(KEY_LOAD_FAVORITE);
+    }
+
 }
