@@ -1,5 +1,6 @@
 package com.example.anu.popularmovies_1.ui;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -51,6 +53,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
     private Movie movie;
     private MovieDbHelper movieDbHelper;
+    private static final String TAG = MovieDetailsActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,27 +101,13 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 //Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
 
                 movieDbHelper.updateFavorite(movie.getId(), checked);
+                movie.setIsFavorite(checked);
                 setFavorite(checked);
             }
         });
 
         populateMovieDetails();
 
-
-    }
-
-    /**
-     * method to set favorite based either on the value retrieved rom local db
-     * or when user click on the favorite
-     * @param isFavorite favorite or not
-     */
-    private void setFavorite(int isFavorite) {
-        if (isFavorite == 1) {
-            btnFavorite.setBackgroundResource(R.drawable.ic_favorite);
-        }
-        else {
-            btnFavorite.setBackgroundResource(R.drawable.ic_not_favorite);
-        }
 
     }
 
@@ -186,8 +175,23 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 .placeholder(R.drawable.ic_place_holder)
                 .error(R.drawable.ic_place_holder)
                 .into(imgPoster);
+        setFavorite(movie.isFavorite());
     }
 
+    /**
+     * method to set favorite based either on the value retrieved rom local db
+     * or when user click on the favorite
+     * @param isFavorite favorite or not
+     */
+    private void setFavorite(int isFavorite) {
+        if (isFavorite == 1) {
+            btnFavorite.setBackgroundResource(R.drawable.ic_favorite);
+        }
+        else {
+            btnFavorite.setBackgroundResource(R.drawable.ic_not_favorite);
+        }
+
+    }
 
     /**
      * method to generate bitmap from image
@@ -226,5 +230,18 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent();
+
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(MainActivity.KEY_MOVIE_RESPONSE, movie);
+        bundle.putInt(MainActivity.KEY_CLICKED_POSITION, getIntent().getIntExtra(MainActivity.KEY_CLICKED_POSITION, -1));
+
+        intent.putExtras(bundle);
+        setResult(RESULT_OK, intent);
+        super.onBackPressed();
     }
 }

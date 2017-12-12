@@ -21,6 +21,7 @@ import android.widget.TextView;
 import com.example.anu.popularmovies_1.MoviesPreferences;
 import com.example.anu.popularmovies_1.R;
 import com.example.anu.popularmovies_1.adapter.MovieAdapter;
+import com.example.anu.popularmovies_1.data.MovieContract;
 import com.example.anu.popularmovies_1.data.MovieDbHelper;
 import com.example.anu.popularmovies_1.model.Movie;
 import com.example.anu.popularmovies_1.model.MovieResponse;
@@ -58,13 +59,18 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int MOVIES_LOADER_ID = 0;
     private static final Bundle bundle = null;
+
     static String KEY_MOVIE_RESPONSE = "movie_response";
+    static String KEY_CLICKED_POSITION = "clicked_position";
+
     LoaderManager.LoaderCallbacks callBacks = MainActivity.this;
 
     //flag to indicate if preference value has been updated or not
     private static boolean PREFERENCE_UPDATED = false;
 
     private MovieDbHelper movieDbHelper;
+
+    private static final int REQUEST_CODE_DETAILS = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,10 +165,13 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
     @Override
     public void onThumbnailClick(int pos) {
         Intent iDetail = new Intent(MainActivity.this, MovieDetailsActivity.class);
+
         Bundle bundle = new Bundle();
         bundle.putParcelable(KEY_MOVIE_RESPONSE, movieList.get(pos));
+        bundle.putInt(KEY_CLICKED_POSITION, pos);
+
         iDetail.putExtras(bundle);
-        startActivity(iDetail);
+        startActivityForResult(iDetail, REQUEST_CODE_DETAILS);
     }
 
     @Override
@@ -248,6 +257,20 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
         if (null!=data){
             List<Movie> movies = data.getResults();
             if (movies.size()!=0){
+
+                for (int i=0;i<movies.size();i++){
+                    Cursor cursor = movieDbHelper.getMovieById(movies.get(i).getId());
+                    int favorite;
+                    if (cursor.getCount()!=0){
+                        cursor.moveToFirst();
+                        favorite = cursor.getInt(cursor.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_FAVORITE));
+                    }
+                    else {
+                        favorite = 0;
+                    }
+                    Log.d("checkFavorite", "favorite : "+favorite);
+                    movies.get(i).setIsFavorite(favorite);
+                }
                 movieList.addAll(movies);
                 movieAdapter.notifyDataSetChanged();
             }
@@ -354,5 +377,27 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
     @Override
     protected void onResume() {
         super.onResume();
+        movieAdapter.refreshData();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d("checkresult", "onActivityResult");
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_DETAILS){
+            Log.d("checkresult", "if 1 ");
+            if (resultCode == RESULT_OK){
+                Log.d("checkresult", "if 2 ");
+                movieAdapter.notifyDataSetChanged();
+
+                Bundle bundle = data.getExtras();
+                Movie movie = bundle.getParcelable(MainActivity.KEY_MOVIE_RESPONSE);
+                int pos = bundle.getInt(KEY_CLICKED_POSITION, -1);
+                Log.d("checkresult", "pos : "+pos);
+                if (pos != -1){
+                    movieList.get(pos).setIsFavorite(movie.isFavorite());
+                }
+            }
+        }
     }
 }

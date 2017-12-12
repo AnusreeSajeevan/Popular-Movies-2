@@ -90,7 +90,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieHolder> {
             long insertResult = movieDbHelper.addNewMovie(movie.getId(), favorite);
         }
         else {
-            //get saved favorite value from cursor
+//get saved favorite value from cursor
             cursor.moveToFirst();
             favorite = cursor.getInt(cursor.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_FAVORITE));
 
@@ -141,7 +141,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieHolder> {
         else {
             holder.btnFavorite.setBackgroundResource(R.drawable.ic_not_favorite);
         }
-
     }
 
     /**

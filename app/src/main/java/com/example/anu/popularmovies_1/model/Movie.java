@@ -24,6 +24,15 @@ public class Movie implements Parcelable{
     private String posterPath;
     @SerializedName("original_language")
     private String originalLanguage;
+    private int isFavorite;
+
+    public int isFavorite() {
+        return isFavorite;
+    }
+
+    public void setIsFavorite(int isFavorite) {
+        this.isFavorite = isFavorite;
+    }
 
     protected Movie(Parcel in) {
         voteCount = in.readInt();
@@ -39,6 +48,8 @@ public class Movie implements Parcelable{
         backdropPath = in.readString();
         overview = in.readString();
         releaseDate = in.readString();
+        isFavorite = in.readInt();
+
     }
 
     public static final Creator<Movie> CREATOR = new Creator<Movie>() {
@@ -190,6 +201,7 @@ public class Movie implements Parcelable{
                 ", backdropPath='" + backdropPath + '\'' +
                 ", overview='" + overview + '\'' +
                 ", releaseDate='" + releaseDate + '\'' +
+                ", isFavorite='" + isFavorite + '\'' +
                 '}';
     }
 
@@ -208,5 +220,6 @@ public class Movie implements Parcelable{
         parcel.writeString(backdropPath);
         parcel.writeString(overview);
         parcel.writeString(releaseDate);
+        parcel.writeInt(isFavorite);
     }
 }
