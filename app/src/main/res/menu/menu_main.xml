@@ -6,4 +6,8 @@
     android:title="@string/settings"
     app:showAsAction="ifRoom"
     android:icon="@drawable/ic_settings"/>
+<item
+    android:id="@+id/action_favorites"
+    android:title="@string/favorites"
+    app:showAsAction="never"/>
 </menu>

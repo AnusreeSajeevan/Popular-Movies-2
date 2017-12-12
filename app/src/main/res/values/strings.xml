@@ -23,4 +23,6 @@
 
     <string name="add_favorite">Added to favorite</string>
     <string name="remove_favorite">Removed from favorite</string>
+
+    <string name="favorites">Favorites</string>
 </resources>

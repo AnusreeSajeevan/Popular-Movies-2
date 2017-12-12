@@ -17,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.anu.popularmovies_1.MoviesPreferences;
 import com.example.anu.popularmovies_1.R;
@@ -368,6 +369,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
             case R.id.action_settings:
                 Intent iSettings = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(iSettings);
+                return true;
+            case R.id.action_favorites:
+                Toast.makeText(this, getResources().getString(R.string.favorites), Toast.LENGTH_SHORT).show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
