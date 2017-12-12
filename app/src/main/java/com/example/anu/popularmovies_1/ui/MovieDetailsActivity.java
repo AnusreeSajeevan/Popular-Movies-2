@@ -9,10 +9,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.example.anu.popularmovies_1.R;
+import com.example.anu.popularmovies_1.adapter.MovieHolder;
+import com.example.anu.popularmovies_1.data.MovieDbHelper;
 import com.example.anu.popularmovies_1.model.Movie;
 import com.example.anu.popularmovies_1.utils.CommonUtils;
 import com.squareup.picasso.Callback;
@@ -41,15 +45,20 @@ public class MovieDetailsActivity extends AppCompatActivity {
     Toolbar toolbar;
     @BindView(R.id.appbar_layout)
     AppBarLayout appbarLayout;
+    @BindView(R.id.btn_favorites)
+    ToggleButton btnFavorite;
 
 
     private Movie movie;
+    private MovieDbHelper movieDbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_details);
         ButterKnife.bind(this);
+
+        movieDbHelper = new MovieDbHelper(this);
 
         setupBackNavigation();
 
@@ -65,8 +74,31 @@ public class MovieDetailsActivity extends AppCompatActivity {
         appbarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
             @Override
             public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-                    int offsetAlpha = (int) (appBarLayout.getY() / appBarLayout.getTotalScrollRange());
-                    toolbar.getNavigationIcon().setAlpha(offsetAlpha);
+                int offsetAlpha = (int) (appBarLayout.getY() / appBarLayout.getTotalScrollRange());
+                toolbar.getNavigationIcon().setAlpha(offsetAlpha);
+            }
+        });
+
+        /**
+         * listener registered to detect when user changes favorite
+         */
+        btnFavorite.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                int checked;
+                //String toastMessage;
+                if (isChecked) {
+                    checked = 1;
+                    //toastMessage = context.getResources().getString(R.string.add_favorite);
+                }
+                else {
+                    checked = 0;
+                    //toastMessage = context.getResources().getString(R.string.remove_favorite);
+                }
+                //Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
+
+                movieDbHelper.updateFavorite(movie.getId(), checked);
+                setFavorite(checked);
             }
         });
 
@@ -76,16 +108,31 @@ public class MovieDetailsActivity extends AppCompatActivity {
     }
 
     /**
+     * method to set favorite based either on the value retrieved rom local db
+     * or when user click on the favorite
+     * @param isFavorite favorite or not
+     */
+    private void setFavorite(int isFavorite) {
+        if (isFavorite == 1) {
+            btnFavorite.setBackgroundResource(R.drawable.ic_favorite);
+        }
+        else {
+            btnFavorite.setBackgroundResource(R.drawable.ic_not_favorite);
+        }
+
+    }
+
+    /**
      * method to set back navigation to {@link MovieDetailsActivity}
      */
     private void setupBackNavigation() {
-            toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_left_arrow));
-            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    finish();
-                }
-            });
+        toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_left_arrow));
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
     }
 
     /**
@@ -180,5 +227,4 @@ public class MovieDetailsActivity extends AppCompatActivity {
             }
         });
     }
-
 }

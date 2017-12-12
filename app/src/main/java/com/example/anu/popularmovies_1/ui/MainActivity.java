@@ -212,7 +212,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
                                  * insert new row for the movie if cursor count is 0
                                  */
                                 Cursor cursor = movieDbHelper.getMovieById(movie.getId());
-                                Log.d(TAG, "count : "+cursor.getCount());
 
                                 int count = cursor.getCount();  //return the cursor count
                                 if (count == 0){
@@ -258,14 +257,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
         }else {
             showError(getResources().getString(R.string.err_msg));
         }
-    }
-
-    /**
-     * method to parse and save movie id and favorite to local databse
-     */
-    private void parseAndSaveMoviesToLocalDb(MovieResponse movieResponse) {
-        Log.d(TAG, "movieResponse : "+movieResponse);
-
     }
 
     /**
@@ -360,5 +351,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
         }
     }
 
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
 }

@@ -77,7 +77,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieHolder> {
          * insert new row for the movie if cursor count is 0
          */
         Cursor cursor = movieDbHelper.getMovieById(movie.getId());
-        Log.d(TAG, "count : "+cursor.getCount());
 
         int count = cursor.getCount();  //return the cursor count
 
@@ -89,7 +88,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieHolder> {
             isFavorite = false;
             //insert into local db
             long insertResult = movieDbHelper.addNewMovie(movie.getId(), favorite);
-            Log.d(TAG, "insertResult : "+insertResult);
         }
         else {
             //get saved favorite value from cursor
@@ -101,7 +99,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieHolder> {
             else
                 isFavorite = false;
 
-            holder.btnFavorite.setChecked(isFavorite);
+            //holder.btnFavorite.setChecked(isFavorite);
             setFavorite(holder, favorite);
         }
 
@@ -112,30 +110,22 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieHolder> {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                 int checked;
-                String toastMessage;
+                //String toastMessage;
                 if (isChecked) {
                     checked = 1;
-                    toastMessage = context.getResources().getString(R.string.add_favorite);
+                    //toastMessage = context.getResources().getString(R.string.add_favorite);
                 }
                 else {
                     checked = 0;
-                    toastMessage = context.getResources().getString(R.string.remove_favorite);
+                    //toastMessage = context.getResources().getString(R.string.remove_favorite);
                 }
-                Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
 
-                movieDbHelper.updateFavorite(movie.getId(), checked);
+                int isUpdated = movieDbHelper.updateFavorite(movie.getId(), checked);
+                Log.d(TAG, "isUpdated : "+isUpdated);
                 setFavorite(holder, checked);
             }
         });
-    }
-
-    /**
-     * method to update favorite in local db
-     * @param id movie id which is to be updated
-     * @param checked 1 for favorite, 0 for not favorite
-     */
-    private void updateFavoriteInLocal(int id, int checked) {
-
     }
 
     /**
@@ -173,5 +163,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieHolder> {
     @Override
     public int getItemCount() {
         return movieList.size();
+    }
+
+    public void refreshData(){
+        notifyDataSetChanged();
     }
 }

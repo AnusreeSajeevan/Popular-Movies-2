@@ -12,7 +12,7 @@
     <dimen name="text_size_18">18sp</dimen>
 
     <dimen name="details_left_margin">160dp</dimen>
-    <dimen name="overview_margin_top">200sp</dimen>
+    <dimen name="overview_margin_top">20sp</dimen>
     <dimen name="backdrop_height">250dp</dimen>
     <dimen name="thumbnail_height">220dp</dimen>
     <dimen name="item_height">290dp</dimen>

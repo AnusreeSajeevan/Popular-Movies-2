@@ -107,13 +107,13 @@ public class MovieDbHelper extends SQLiteOpenHelper{
      * @param movieId
      * @param isFavorite 0 for favorite, 1 for not favorite
      */
-    public void updateFavorite(long movieId, int isFavorite){
+    public int updateFavorite(long movieId, int isFavorite){
         sqLiteDatabase = getWritableDatabase();
-        String updateQuery = "UPDATE " + MovieContract.MovieEntry.TABLE_NAME +
-                " SET " + MovieContract.MovieEntry.KEY_COLUMN_FAVORITE + " = '" + isFavorite + "' " +
-                "WHERE " + MovieContract.MovieEntry.KEY_COLUMN_MOVIE_ID + " = '" + movieId + "';";
-        Cursor cursor = sqLiteDatabase.rawQuery(updateQuery, null);
-        Log.d(TAG, "updateQuery : " + updateQuery);
-        Log.d(TAG, "updated count : " + cursor.getCount());
+        ContentValues values = new ContentValues();
+        values.put(MovieContract.MovieEntry.KEY_COLUMN_FAVORITE, isFavorite);
+
+        return sqLiteDatabase.update(MovieContract.MovieEntry.TABLE_NAME, values,
+                MovieContract.MovieEntry.KEY_COLUMN_MOVIE_ID + " = ?", new String[]{String.valueOf(movieId)});
     }
+
 }
