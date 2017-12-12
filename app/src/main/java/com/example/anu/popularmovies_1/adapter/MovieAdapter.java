@@ -77,55 +77,20 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieHolder> {
          * insert new row for the movie if cursor count is 0
          */
         Cursor cursor = movieDbHelper.getMovieById(movie.getId());
-
         int count = cursor.getCount();  //return the cursor count
-
-        boolean isFavorite;
         int favorite;
-
         if (count == 0){
             favorite = 0;   //indicating movie is not favorite(initially)
-            isFavorite = false;
-            //insert into local db
-            long insertResult = movieDbHelper.addNewMovie(movie.getId(), favorite);
+            setFavorite(holder, favorite);
         }
         else {
-//get saved favorite value from cursor
+            //get saved favorite value from cursor
             cursor.moveToFirst();
             favorite = cursor.getInt(cursor.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_FAVORITE));
-
-            if (favorite == 1)
-                isFavorite = true;
-            else
-                isFavorite = false;
-
-            //holder.btnFavorite.setChecked(isFavorite);
             setFavorite(holder, favorite);
         }
 
-        /**
-         * listener registered to detect when user changes favorite
-         */
-        holder.btnFavorite.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                int checked;
-                //String toastMessage;
-                if (isChecked) {
-                    checked = 1;
-                    //toastMessage = context.getResources().getString(R.string.add_favorite);
-                }
-                else {
-                    checked = 0;
-                    //toastMessage = context.getResources().getString(R.string.remove_favorite);
-                }
-                //Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
-
-                int isUpdated = movieDbHelper.updateFavorite(movie.getId(), checked);
-                Log.d(TAG, "isUpdated : "+isUpdated);
-                setFavorite(holder, checked);
-            }
-        });
+        holder.btnFavorite.setEnabled(false);
     }
 
     /**
