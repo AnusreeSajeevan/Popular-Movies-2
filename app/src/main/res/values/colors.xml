@@ -9,4 +9,5 @@
     <color name="background">#edecec</color>
     <color name="colorDarkBlue">#0f70b6</color>
     <color name="grey_seperator">#f1efef</color>
+    <color name="transparent">#00ffffff</color>
 </resources>

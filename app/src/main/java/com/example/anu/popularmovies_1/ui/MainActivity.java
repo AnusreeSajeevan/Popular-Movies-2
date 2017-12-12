@@ -3,6 +3,7 @@ package com.example.anu.popularmovies_1.ui;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -11,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,6 +21,7 @@ import android.widget.TextView;
 import com.example.anu.popularmovies_1.MoviesPreferences;
 import com.example.anu.popularmovies_1.R;
 import com.example.anu.popularmovies_1.adapter.MovieAdapter;
+import com.example.anu.popularmovies_1.data.MovieDbHelper;
 import com.example.anu.popularmovies_1.model.Movie;
 import com.example.anu.popularmovies_1.model.MovieResponse;
 import com.example.anu.popularmovies_1.ui.settings.SettingsActivity;
@@ -61,11 +64,15 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
     //flag to indicate if preference value has been updated or not
     private static boolean PREFERENCE_UPDATED = false;
 
+    private MovieDbHelper movieDbHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        movieDbHelper = new MovieDbHelper(this);
 
         /*
           register MainActivity as a OnPreferenceChangedListener in onCreate
@@ -193,6 +200,28 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
                         String response = NetworkUtils.getResponseFromHttpUrl(url);
                         JSONObject jsonObject = MoviesJsonUtils.getJSONObjectFromResponse(response);
                         movieResponse = new Gson().fromJson(jsonObject.toString(), MovieResponse.class);
+
+                        //parse and save movie id and favories to local database
+                        if (null != movieResponse){
+                            List<Movie> movieList = movieResponse.getResults();
+                            for (int i=0;i<movieList.size();i++){
+                                Movie movie = movieList.get(i);
+
+                                /**
+                                 * if database does not already contains a row for the particular movie, cursor count will be 0
+                                 * insert new row for the movie if cursor count is 0
+                                 */
+                                Cursor cursor = movieDbHelper.getMovieById(movie.getId());
+                                Log.d(TAG, "count : "+cursor.getCount());
+
+                                int count = cursor.getCount();  //return the cursor count
+                                if (count == 0){
+                                    int favorite = 0;
+                                    movieDbHelper.addNewMovie(movie.getId(), favorite);
+                                }
+                            }
+                        }
+
                         return movieResponse;
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -210,6 +239,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
     @Override
     public void onLoadFinished(Loader<MovieResponse> loader, MovieResponse data) {
         movieList.clear();
+
         recyclerviewMovies.setVisibility(View.VISIBLE);
         tvError.setVisibility(View.GONE);
 
@@ -228,6 +258,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
         }else {
             showError(getResources().getString(R.string.err_msg));
         }
+    }
+
+    /**
+     * method to parse and save movie id and favorite to local databse
+     */
+    private void parseAndSaveMoviesToLocalDb(MovieResponse movieResponse) {
+        Log.d(TAG, "movieResponse : "+movieResponse);
+
     }
 
     /**

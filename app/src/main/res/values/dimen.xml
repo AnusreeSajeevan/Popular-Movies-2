@@ -3,6 +3,7 @@
     <dimen name="margin_20">20dp</dimen>
     <dimen name="margin_5">5dp</dimen>
     <dimen name="margin_10">10dp</dimen>
+    <dimen name="margin_40">40dp</dimen>
 
     <dimen name="rating_text_size">16sp</dimen>
     <dimen name="text_size_16">16sp</dimen>
@@ -19,4 +20,5 @@
     <dimen name="details_poster_width">150dp</dimen>
     <dimen name="details_poster_height">200dp</dimen>
     <dimen name="list_padding">2dp</dimen>
+    <dimen name="fvorites_icon_size">20dp</dimen>
 </resources>

@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.example.anu.popularmovies_1.R;
 
@@ -26,6 +27,8 @@ public class MovieHolder extends RecyclerView.ViewHolder{
     TextView txtRating;
     @BindView(R.id.card_view)
     CardView cardView;
+    @BindView(R.id.btn_favorites)
+    ToggleButton btnFavorite;
 
     public MovieHolder(View itemView) {
         super(itemView);

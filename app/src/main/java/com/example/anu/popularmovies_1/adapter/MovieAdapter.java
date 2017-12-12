@@ -1,15 +1,21 @@
 package com.example.anu.popularmovies_1.adapter;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.CompoundButton;
+import android.widget.Toast;
 
 import com.example.anu.popularmovies_1.R;
+import com.example.anu.popularmovies_1.data.MovieContract;
+import com.example.anu.popularmovies_1.data.MovieDbHelper;
 import com.example.anu.popularmovies_1.model.Movie;
 import com.squareup.picasso.Picasso;
 
@@ -27,11 +33,13 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieHolder> {
     private OnClickHandleListener clickHandleListener;
     private static final String TAG = MovieAdapter.class.getSimpleName();
     private static int lastAnimatedPosition = -1;
+    private MovieDbHelper movieDbHelper;
 
     public MovieAdapter(Context context, List<Movie> movieList, OnClickHandleListener clickHandleListener) {
         this.context = context;
         this.movieList = movieList;
         this.clickHandleListener = clickHandleListener;
+        movieDbHelper = new MovieDbHelper(context);
     }
 
     public interface OnClickHandleListener {
@@ -46,7 +54,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieHolder> {
 
     @Override
     public void onBindViewHolder(final MovieHolder holder, final int position) {
-        Movie movie = movieList.get(position);
+        final Movie movie = movieList.get(position);
         holder.txtMovieName.setText(movie.getTitle());
         holder.txtRating.setText(String.valueOf(movie.getVoteAverage()));
         Picasso.with(context)
@@ -63,6 +71,87 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieHolder> {
         });
         
         setEnterAnimation(holder.cardView, position);
+
+        /**
+         * if database does not already contains a row for the particular movie, cursor count will be 0
+         * insert new row for the movie if cursor count is 0
+         */
+        Cursor cursor = movieDbHelper.getMovieById(movie.getId());
+        Log.d(TAG, "count : "+cursor.getCount());
+
+        int count = cursor.getCount();  //return the cursor count
+
+        boolean isFavorite;
+        int favorite;
+
+        if (count == 0){
+            favorite = 0;   //indicating movie is not favorite(initially)
+            isFavorite = false;
+            //insert into local db
+            long insertResult = movieDbHelper.addNewMovie(movie.getId(), favorite);
+            Log.d(TAG, "insertResult : "+insertResult);
+        }
+        else {
+            //get saved favorite value from cursor
+            cursor.moveToFirst();
+            favorite = cursor.getInt(cursor.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_FAVORITE));
+
+            if (favorite == 1)
+                isFavorite = true;
+            else
+                isFavorite = false;
+
+            holder.btnFavorite.setChecked(isFavorite);
+            setFavorite(holder, favorite);
+        }
+
+        /**
+         * listener registered to detect when user changes favorite
+         */
+        holder.btnFavorite.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                int checked;
+                String toastMessage;
+                if (isChecked) {
+                    checked = 1;
+                    toastMessage = context.getResources().getString(R.string.add_favorite);
+                }
+                else {
+                    checked = 0;
+                    toastMessage = context.getResources().getString(R.string.remove_favorite);
+                }
+                Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
+
+                movieDbHelper.updateFavorite(movie.getId(), checked);
+                setFavorite(holder, checked);
+            }
+        });
+    }
+
+    /**
+     * method to update favorite in local db
+     * @param id movie id which is to be updated
+     * @param checked 1 for favorite, 0 for not favorite
+     */
+    private void updateFavoriteInLocal(int id, int checked) {
+
+    }
+
+    /**
+     * method to set favorite based either on the value retrieved rom local db
+     * or when user click on the favorite
+     * @param holder
+     * @param isFavorite favorite or not
+     */
+    private void setFavorite(MovieHolder holder, int isFavorite) {
+        if (isFavorite == 1) {
+            holder.btnFavorite.setBackgroundResource(R.drawable.ic_favorite);
+        }
+        else {
+            holder.btnFavorite.setBackgroundResource(R.drawable.ic_not_favorite);
+        }
+
     }
 
     /**
