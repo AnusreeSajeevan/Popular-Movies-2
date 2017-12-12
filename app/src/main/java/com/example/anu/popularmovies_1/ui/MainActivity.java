@@ -113,16 +113,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
                     loadFavorite = false;
                     getSupportLoaderManager().restartLoader(MOVIES_LOADER_ID, null, callBacks);
                 } else {
-                    Cursor cursorFavorites = movieDbHelper.getFavoiteMovies();
-                    if (cursorFavorites.getCount()==0){
-                        showError(getResources().getString(R.string.no_connectivity));
-                        loadFavorite = false;
-                    }
-                    else {
-                        loadFavorite = true;
-                        getFavorites();
-                    }
-
+                    favorites();
                 }
             }
         });
@@ -142,9 +133,34 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
         recyclerviewMovies.setAdapter(movieAdapter);
         getSortOrderAndSetup();
         if (NetworkUtils.isNetworkAvailable(MainActivity.this)) {
+            loadFavorite = false;
             getSupportLoaderManager().initLoader(MOVIES_LOADER_ID, bundle, callBacks);
         } else {
             showError(getResources().getString(R.string.no_connectivity));
+        }
+
+
+
+        if (NetworkUtils.isNetworkAvailable(MainActivity.this)) {
+            loadFavorite = false;
+            getSupportLoaderManager().restartLoader(MOVIES_LOADER_ID, null, callBacks);
+        } else {
+           favorites();
+        }
+    }
+
+    /**
+     * metod to deterine wether to show favorite movies from local or error message
+     * when there is no onnectivity
+     */
+    private void favorites() { Cursor cursorFavorites = movieDbHelper.getFavoiteMovies();
+        if (cursorFavorites.getCount()==0){
+            showError(getResources().getString(R.string.no_connectivity));
+            loadFavorite = false;
+        }
+        else {
+            loadFavorite = true;
+            getFavorites();
         }
     }
 
@@ -415,6 +431,11 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
             tvNoFavorites.setVisibility(View.VISIBLE);
         }
         else {
+
+            recyclerviewMovies.setVisibility(View.VISIBLE);
+            if (swipeRefreshLayout.isRefreshing())
+                swipeRefreshLayout.setRefreshing(false);
+
             cursorFavorites.moveToFirst();
             for (int i=0;i<cursorFavorites.getCount();i++){
                 movieList.add(new Movie(

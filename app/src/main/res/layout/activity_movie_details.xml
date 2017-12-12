@@ -35,6 +35,7 @@
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
     <ImageView
+        android:background="@color/colorPrimary"
         android:adjustViewBounds="true"
         android:elevation="@dimen/margin_20"
         android:id="@+id/img_poster"
