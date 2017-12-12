@@ -101,9 +101,11 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieHolder> {
      */
     private void setFavorite(MovieHolder holder, int isFavorite) {
         if (isFavorite == 1) {
+            holder.btnFavorite.setVisibility(View.VISIBLE);
             holder.btnFavorite.setBackgroundResource(R.drawable.ic_favorite);
         }
         else {
+            holder.btnFavorite.setVisibility(View.GONE);
             holder.btnFavorite.setBackgroundResource(R.drawable.ic_not_favorite);
         }
     }

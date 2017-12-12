@@ -20,5 +20,6 @@
     <dimen name="details_poster_width">150dp</dimen>
     <dimen name="details_poster_height">200dp</dimen>
     <dimen name="list_padding">2dp</dimen>
-    <dimen name="fvorites_icon_size">20dp</dimen>
+    <dimen name="favorites_icon_size">15dp</dimen>
+    <dimen name="details_favorites_icon_size">20dp</dimen>
 </resources>

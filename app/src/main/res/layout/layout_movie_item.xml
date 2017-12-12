@@ -34,24 +34,24 @@
             <TextView
                 android:layout_marginTop="@dimen/margin_5"
                 android:layout_below="@+id/txt_movie_name"
+                android:layout_toRightOf="@+id/btn_favorites"
                 android:drawableLeft="@drawable/ic_rating"
                 android:drawablePadding="@dimen/margin_5"
-                android:layout_marginRight="@dimen/margin_5"
                 android:id="@+id/txt_rating"
                 android:textSize="@dimen/rating_text_size"
                 android:textColor="@color/colorBlack"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
             <ToggleButton
-                android:textColor="@color/transparent"
-                android:layout_marginTop="@dimen/margin_5"
-                android:layout_below="@+id/txt_movie_name"
+                android:layout_marginRight="@dimen/margin_5"
+                android:layout_marginEnd="@dimen/margin_5"
                 android:background="@drawable/ic_not_favorite"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true"
+                android:textColor="@color/transparent"
+                android:layout_marginTop="@dimen/margin_10"
+                android:layout_below="@+id/txt_movie_name"
                 android:id="@+id/btn_favorites"
-                android:layout_width="@dimen/fvorites_icon_size"
-                android:layout_height="@dimen/fvorites_icon_size" />
+                android:layout_width="@dimen/favorites_icon_size"
+                android:layout_height="@dimen/favorites_icon_size" />
         </RelativeLayout>
     </LinearLayout>
 </android.support.v7.widget.CardView>

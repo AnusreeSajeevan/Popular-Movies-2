@@ -103,8 +103,8 @@
                     android:layout_marginTop="@dimen/margin_10"
                     android:background="@drawable/ic_not_favorite"
                     android:id="@+id/btn_favorites"
-                    android:layout_width="@dimen/fvorites_icon_size"
-                    android:layout_height="@dimen/fvorites_icon_size" />
+                    android:layout_width="@dimen/details_favorites_icon_size"
+                    android:layout_height="@dimen/details_favorites_icon_size" />
             </LinearLayout>
             <TextView
                 android:layout_below="@+id/layout"
