@@ -153,7 +153,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
      * metod to deterine wether to show favorite movies from local or error message
      * when there is no onnectivity
      */
-    private void favorites() { Cursor cursorFavorites = movieDbHelper.getFavoiteMovies();
+    private void favorites() {
+        Cursor cursorFavorites = movieDbHelper.getFavoiteMovies();
         if (cursorFavorites.getCount()==0){
             showError(getResources().getString(R.string.no_connectivity));
             loadFavorite = false;
@@ -436,8 +437,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
             if (swipeRefreshLayout.isRefreshing())
                 swipeRefreshLayout.setRefreshing(false);
 
-            cursorFavorites.moveToFirst();
+
             for (int i=0;i<cursorFavorites.getCount();i++){
+
+                if (i==0)
+                    cursorFavorites.moveToFirst();
+                else
+                    cursorFavorites.moveToNext();
+
                 movieList.add(new Movie(
                         cursorFavorites.getInt(cursorFavorites.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_MOVIE_ID)),
                         cursorFavorites.getDouble(cursorFavorites.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_VOTE_AVERAGE)),
