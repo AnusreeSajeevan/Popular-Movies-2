@@ -172,7 +172,8 @@ public class MovieDetailsActivity extends AppCompatActivity {
           set movie poster image
          */
         Picasso.with(this)
-                .load(MovieDBUtils.URL_POSTER_PATH + movie.getPosterPath())
+                .load(movie.getPosterPath())
+                .fit()
                 .placeholder(R.drawable.ic_place_holder)
                 .error(R.drawable.ic_place_holder)
                 .into(imgPoster);
