@@ -1,8 +1,10 @@
 package com.example.anu.popularmovies_1.ui;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -14,10 +16,12 @@ import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.example.anu.popularmovies_1.R;
 import com.example.anu.popularmovies_1.adapter.MovieHolder;
+import com.example.anu.popularmovies_1.data.MovieContract;
 import com.example.anu.popularmovies_1.data.MovieDbHelper;
 import com.example.anu.popularmovies_1.model.Movie;
 import com.example.anu.popularmovies_1.utils.CommonUtils;
@@ -90,18 +94,40 @@ public class MovieDetailsActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                 int checked;
-                //String toastMessage;
                 if (isChecked) {
-                    checked = 1;
-                    //toastMessage = context.getResources().getString(R.string.add_favorite);
+                    /**
+                     * insert favorites into uer's favorite movies collection
+                     */
+                    int favorite = 1;
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(MovieContract.MovieEntry.KEY_COLUMN_MOVIE_ID, movie.getId());
+                    contentValues.put(MovieContract.MovieEntry.KEY_COLUMN_FAVORITE, favorite);
+                    contentValues.put(MovieContract.MovieEntry.KEY_COLUMN_TITLE, movie.getTitle());
+                    contentValues.put(MovieContract.MovieEntry.KEY_COLUMN_ORIGINAL_TITLE, movie.getOriginalTitle());
+                    contentValues.put(MovieContract.MovieEntry.KEY_COLUMN_VOTE_AVERAGE, movie.getVoteAverage());
+                    contentValues.put(MovieContract.MovieEntry.KEY_COLUMN_POSTER_PATH, movie.getPosterPath());
+                    contentValues.put(MovieContract.MovieEntry.KEY_COLUMN_BACKDROP_PATH, movie.getBackdropPath());
+                    contentValues.put(MovieContract.MovieEntry.KEY_COLUMN_RELEASE_DATE, movie.getReleaseDate());
+                    contentValues.put(MovieContract.MovieEntry.KEY_COLUMN_OVERVIEW, movie.getOverview());
+                    Uri uri = getContentResolver().insert(MovieContract.MovieEntry.CONTENT_URI, contentValues);
+                    if(null != uri){
+                         checked = 1;
+                    }
+                    else {
+                        checked = 0;
+                    }
                 }
                 else {
-                    checked = 0;
-                    //toastMessage = context.getResources().getString(R.string.remove_favorite);
+                    String movieId = String.valueOf(movie.getId());
+                    int deleted = getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI.buildUpon().appendPath(movieId).build(),
+                            null, null);
+                    if (deleted>0){
+                         checked = 0;
+                    }
+                    else {
+                        checked = 1;
+                    }
                 }
-                //Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
-
-                movieDbHelper.updateFavorite(movie.getId(), checked);
                 movie.setIsFavorite(checked);
                 setFavorite(checked);
             }
@@ -172,7 +198,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
           set movie poster image
          */
         Picasso.with(this)
-                .load(movie.getPosterPath())
+                .load(MovieDBUtils.URL_POSTER_PATH + movie.getPosterPath())
                 .fit()
                 .placeholder(R.drawable.ic_place_holder)
                 .error(R.drawable.ic_place_holder)
@@ -187,9 +213,11 @@ public class MovieDetailsActivity extends AppCompatActivity {
      */
     private void setFavorite(int isFavorite) {
         if (isFavorite == 1) {
+            btnFavorite.setChecked(true);
             btnFavorite.setBackgroundResource(R.drawable.ic_favorite);
         }
         else {
+            btnFavorite.setChecked(false);
             btnFavorite.setBackgroundResource(R.drawable.ic_not_favorite);
         }
 
@@ -234,6 +262,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * metod ovveriden to send the favorite sttus back to MainActivity
+     */
     @Override
     public void onBackPressed() {
         Intent intent = new Intent();

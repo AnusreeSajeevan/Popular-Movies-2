@@ -5,11 +5,11 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -19,9 +19,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Adapter;
+import android.widget.FrameLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.anu.popularmovies_1.MoviesPreferences;
 import com.example.anu.popularmovies_1.R;
@@ -58,20 +57,25 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
     SwipeRefreshLayout swipeRefreshLayout;
     @BindView(R.id.tv_no_favorites)
     TextView tvNoFavorites;
+    @BindView(R.id.frame_layout)
+    FrameLayout frameLayout;
 
     private MovieAdapter movieAdapter;
     private static List<Movie> movieList = new ArrayList<>();
     private String sortBy;
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final int MOVIES_LOADER_ID = 0;
+    private static final int MOVIES_LOADER_ID = 10;
+    private static final int FAVORITE_MOVIES_LOADER_ID = 20;
     private static final Bundle bundle = null;
 
     static String KEY_MOVIE_RESPONSE = "movie_response";
     static String KEY_CLICKED_POSITION = "clicked_position";
-    static String KEY_LOAD_FAVORITE = "load_favorite";
+    static String KEY_SORT_BY = "sory_by";
 
     LoaderManager.LoaderCallbacks callBacks = MainActivity.this;
+
+    LoaderManager.LoaderCallbacks callBacksFavorites = MainActivity.this;
 
     //flag to indicate if preference value has been updated or not
     private static boolean PREFERENCE_UPDATED = false;
@@ -79,7 +83,76 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
     private MovieDbHelper movieDbHelper;
 
     private static final int REQUEST_CODE_DETAILS = 10;
-    private boolean loadFavorite = false;
+
+    private static final int mPosition = RecyclerView.NO_POSITION;
+
+    /**
+     * Loader calbacks to load user's favorite movies from local database
+     */
+    private LoaderManager.LoaderCallbacks<Cursor> cursorLoaderCallbacks = new LoaderManager.LoaderCallbacks<Cursor>() {
+        @Override
+        public Loader<Cursor> onCreateLoader(int loaderId, Bundle args) {
+            switch (loaderId) {
+                case FAVORITE_MOVIES_LOADER_ID:
+                    return new CursorLoader(MainActivity.this, MovieContract.MovieEntry.CONTENT_URI,
+                            null,
+                            null,
+                            null,
+                            null);
+            }
+            return null;
+        }
+
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            movieList.clear();
+            if (swipeRefreshLayout.isRefreshing())
+                swipeRefreshLayout.setRefreshing(false);
+
+            if (null != data) {
+                data.moveToFirst();
+                for (int i = 0; i < data.getCount(); i++) {
+                    movieList.add(new Movie(data.getInt(data.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_MOVIE_ID)),
+                            data.getDouble(data.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_VOTE_AVERAGE)),
+                            data.getString(data.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_TITLE)),
+                            data.getString(data.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_POSTER_PATH)),
+                            data.getInt(data.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_FAVORITE)),
+                            data.getString(data.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_ORIGINAL_TITLE)),
+                            data.getString(data.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_BACKDROP_PATH)),
+                            data.getString(data.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_OVERVIEW)),
+                            data.getString(data.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_RELEASE_DATE))));
+                    data.moveToNext();
+                }
+                movieAdapter.notifyDataSetChanged();
+                if (data.getCount() != 0) {
+                    tvNoFavorites.setVisibility(View.GONE);
+                    tvError.setVisibility(View.GONE);
+                } else {
+                    showNoFavorites();
+                }
+            } else {
+                showNoFavorites();
+            }
+        }
+
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+
+        }
+    };
+
+    /**
+     * method to show appropriate message when there is no favorite movies
+     */
+    private void showNoFavorites() {
+        if (swipeRefreshLayout.isRefreshing())
+            swipeRefreshLayout.setRefreshing(false);
+
+        movieList.clear();
+        movieAdapter.notifyDataSetChanged();
+        tvError.setVisibility(View.GONE);
+        tvNoFavorites.setVisibility(View.VISIBLE);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
          * restore the saved data
          */
         if (null != savedInstanceState)
-            loadFavorite = savedInstanceState.getBoolean(KEY_LOAD_FAVORITE);
+            sortBy = savedInstanceState.getString(KEY_SORT_BY);
 
         movieDbHelper = new MovieDbHelper(this);
 
@@ -109,12 +182,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (NetworkUtils.isNetworkAvailable(MainActivity.this)) {
-                    loadFavorite = false;
-                    getSupportLoaderManager().restartLoader(MOVIES_LOADER_ID, null, callBacks);
-                } else {
-                    favorites();
-                }
+                initalizeOrRestartLoader();
             }
         });
         setupMoviesList();
@@ -131,38 +199,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
 
         recyclerviewMovies.setLayoutManager(new GridLayoutManager(MainActivity.this, columnCount));
         recyclerviewMovies.setAdapter(movieAdapter);
-        getSortOrderAndSetup();
-        if (NetworkUtils.isNetworkAvailable(MainActivity.this)) {
-            loadFavorite = false;
-            getSupportLoaderManager().initLoader(MOVIES_LOADER_ID, bundle, callBacks);
-        } else {
-            showError(getResources().getString(R.string.no_connectivity));
-        }
-
-
-
-        if (NetworkUtils.isNetworkAvailable(MainActivity.this)) {
-            loadFavorite = false;
-            getSupportLoaderManager().restartLoader(MOVIES_LOADER_ID, null, callBacks);
-        } else {
-           favorites();
-        }
-    }
-
-    /**
-     * metod to deterine wether to show favorite movies from local or error message
-     * when there is no onnectivity
-     */
-    private void favorites() {
-        Cursor cursorFavorites = movieDbHelper.getFavoiteMovies();
-        if (cursorFavorites.getCount()==0){
-            showError(getResources().getString(R.string.no_connectivity));
-            loadFavorite = false;
-        }
-        else {
-            loadFavorite = true;
-            getFavorites();
-        }
+        initalizeOrRestartLoader();
     }
 
     /*
@@ -194,6 +231,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
                 getSupportActionBar().setTitle(getResources().getString(R.string.pref_sortby_popular_label));
             else if (sortBy.equalsIgnoreCase(getResources().getString(R.string.pref_sortby_top_rated_value)))
                 getSupportActionBar().setTitle(getResources().getString(R.string.pref_sortby_top_rated_label));
+            else if (sortBy.equalsIgnoreCase(getResources().getString(R.string.pref_sortby_favorites_value)))
+                getSupportActionBar().setTitle(getResources().getString(R.string.pref_sortby_favorites_label));
         }
     }
 
@@ -217,73 +256,55 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
 
     @Override
     public Loader<MovieResponse> onCreateLoader(int id, Bundle args) {
-        return new AsyncTaskLoader<MovieResponse>(this) {
+        switch (id) {
+            case MOVIES_LOADER_ID:
+                return new AsyncTaskLoader<MovieResponse>(this) {
 
-            MovieResponse movieResponse = null;
+                    MovieResponse movieResponse = null;
 
-            @Override
-            protected void onStartLoading() {
-                if (movieResponse != null) {
-                    deliverResult(movieResponse);
-                } else
-                    forceLoad();
-            }
-
-            @Override
-            public void deliverResult(MovieResponse data) {
-                movieResponse = data;
-                super.deliverResult(data);
-            }
-
-            /**
-             * method to load and fetch movie
-             * @return fetched MovieResponse
-             */
-            @Override
-            public MovieResponse loadInBackground() {
-                try {
-
-                    URL url = NetworkUtils.buildUrl(sortBy);
-                    MovieResponse movieResponse;
-                    try {
-                        String response = NetworkUtils.getResponseFromHttpUrl(url);
-                        JSONObject jsonObject = MoviesJsonUtils.getJSONObjectFromResponse(response);
-                        movieResponse = new Gson().fromJson(jsonObject.toString(), MovieResponse.class);
-
-                        //parse and save movie id and favories to local database
-                        if (null != movieResponse) {
-                            List<Movie> movieList = movieResponse.getResults();
-                            for (int i = 0; i < movieList.size(); i++) {
-                                Movie movie = movieList.get(i);
-
-                                /**
-                                 * if database does not already contains a row for the particular movie, cursor count will be 0
-                                 * insert new row for the movie if cursor count is 0
-                                 */
-                                Cursor cursor = movieDbHelper.getMovieById(movie.getId());
-
-                                int count = cursor.getCount();  //return the cursor count
-                                if (count == 0) {
-                                    int favorite = 0;
-                                    movieDbHelper.addNewMovie(movie.getId(), favorite, movie.getTitle(), movie.getOriginalTitle(),
-                                            movie.getVoteAverage(), movie.getPosterPath(), movie.getBackdropPath(),
-                                            movie.getReleaseDate(), movie.getOverview());
-                                }
-                            }
-                        }
-
-                        return movieResponse;
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                    @Override
+                    protected void onStartLoading() {
+                        if (movieResponse != null) {
+                            deliverResult(movieResponse);
+                        } else
+                            forceLoad();
                     }
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-        };
+
+                    @Override
+                    public void deliverResult(MovieResponse data) {
+                        movieResponse = data;
+                        super.deliverResult(data);
+                    }
+
+                    /**
+                     * method to load and fetch movie
+                     * @return fetched MovieResponse
+                     */
+                    @Override
+                    public MovieResponse loadInBackground() {
+                        try {
+
+                            URL url = NetworkUtils.buildUrl(sortBy);
+                            MovieResponse movieResponse;
+                            try {
+                                String response = NetworkUtils.getResponseFromHttpUrl(url);
+                                JSONObject jsonObject = MoviesJsonUtils.getJSONObjectFromResponse(response);
+                                movieResponse = new Gson().fromJson(jsonObject.toString(), MovieResponse.class);
+                                return movieResponse;
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }
+                };
+            default:
+                throw new RuntimeException("Loader not implemented");
+        }
     }
 
     @Override
@@ -386,15 +407,53 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
           and set the flag false
          */
         if (PREFERENCE_UPDATED) {
-            if (NetworkUtils.isNetworkAvailable(MainActivity.this)) {
-                getSortOrderAndSetup();
-                getSupportLoaderManager().restartLoader(MOVIES_LOADER_ID, null, callBacks);
-                PREFERENCE_UPDATED = false;
+            initalizeOrRestartLoader();
+            PREFERENCE_UPDATED = false;
+        }
+    }
+
+    /**
+     * method responsible for either initializing or restaring loaders based on user's sort preference
+     */
+    private void initalizeOrRestartLoader() {
+        getSortOrderAndSetup();
+        if (sortBy.equalsIgnoreCase(getResources().getString(R.string.pref_sortby_favorites_value))) {
+            initializeOrRestartFavoritesLoader();
+        } else {
+            if (NetworkUtils.isNetworkAvailable(this)) {
+                Loader loader = getSupportLoaderManager().getLoader(MOVIES_LOADER_ID);
+                if (null == loader)
+                    getSupportLoaderManager().initLoader(MOVIES_LOADER_ID, null, callBacks);
+                else
+                    getSupportLoaderManager().restartLoader(MOVIES_LOADER_ID, null, callBacks);
             } else {
-                showError(getResources().getString(R.string.no_connectivity));
+                initializeOrRestartFavoritesLoader();
+                showSnackBar();
             }
         }
     }
+
+    /**
+     * method to either initialize or restart loader for favorite movies
+     */
+    private void initializeOrRestartFavoritesLoader() {
+        Loader loaderFavorites = getSupportLoaderManager().getLoader(FAVORITE_MOVIES_LOADER_ID);
+        if (null == loaderFavorites)
+            getSupportLoaderManager().initLoader(FAVORITE_MOVIES_LOADER_ID, null, cursorLoaderCallbacks);
+        else
+            getSupportLoaderManager().restartLoader(FAVORITE_MOVIES_LOADER_ID, null, cursorLoaderCallbacks);
+
+        // MoviesPreferences.setUserPreferredSortByValue(this, getResources().getString(R.string.pref_sortby_favorites_value));
+    }
+
+    /**
+     * method to show snackbar whle showing faorite movies when there is no internet connection
+     */
+    private void showSnackBar() {
+        Snackbar.make(frameLayout, "No intenet connction, Showing favorite movies", Snackbar.LENGTH_LONG).show();
+        setTitle(getResources().getString(R.string.pref_sortby_favorites_value));
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -409,11 +468,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
             case R.id.action_settings:
                 Intent iSettings = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(iSettings);
-                return true;
-            case R.id.action_favorites:
-                loadFavorite = true;
-                Toast.makeText(this, getResources().getString(R.string.favorites), Toast.LENGTH_SHORT).show();
-                getFavorites();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -430,17 +484,16 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
         tvError.setVisibility(View.GONE);
         if (cursorFavorites.getCount() == 0) {
             tvNoFavorites.setVisibility(View.VISIBLE);
-        }
-        else {
+        } else {
 
             recyclerviewMovies.setVisibility(View.VISIBLE);
             if (swipeRefreshLayout.isRefreshing())
                 swipeRefreshLayout.setRefreshing(false);
 
 
-            for (int i=0;i<cursorFavorites.getCount();i++){
+            for (int i = 0; i < cursorFavorites.getCount(); i++) {
 
-                if (i==0)
+                if (i == 0)
                     cursorFavorites.moveToFirst();
                 else
                     cursorFavorites.moveToNext();
@@ -455,7 +508,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
                         cursorFavorites.getString(cursorFavorites.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_BACKDROP_PATH)),
                         cursorFavorites.getString(cursorFavorites.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_OVERVIEW)),
                         cursorFavorites.getString(cursorFavorites.getColumnIndex(MovieContract.MovieEntry.KEY_COLUMN_RELEASE_DATE))
-                        ));
+                ));
             }
             movieAdapter.notifyDataSetChanged();
         }
@@ -467,24 +520,29 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
         movieAdapter.notifyDataSetChanged();
     }
 
+    /**
+     * method ovveride to show the faorite status when returning to MainActivity from (@link {@link MovieDetailsActivity}
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_DETAILS) {
             if (resultCode == RESULT_OK) {
-               if (loadFavorite){
+                if (sortBy.equalsIgnoreCase(getResources().getString(R.string.pref_sortby_favorites_value))) {
                     getFavorites();
-               }
-               else {
-                   movieAdapter.notifyDataSetChanged();
+                } else {
+                    movieAdapter.notifyDataSetChanged();
 
-                   Bundle bundle = data.getExtras();
-                   Movie movie = bundle.getParcelable(MainActivity.KEY_MOVIE_RESPONSE);
-                   int pos = bundle.getInt(KEY_CLICKED_POSITION, -1);
-                   if (pos != -1) {
-                       movieList.get(pos).setIsFavorite(movie.isFavorite());
-                   }
-               }
+                    Bundle bundle = data.getExtras();
+                    Movie movie = bundle.getParcelable(MainActivity.KEY_MOVIE_RESPONSE);
+                    int pos = bundle.getInt(KEY_CLICKED_POSITION, -1);
+                    if (pos != -1) {
+                        movieList.get(pos).setIsFavorite(movie.isFavorite());
+                    }
+                }
             }
         }
     }
@@ -492,24 +550,26 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
     /**
      * save the value of {@literal loadFavorite} here,
      * so thet we can retrieve it in {@literal onRestoreInstanceState} when configuration changes
+     *
      * @param outState
      */
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(KEY_LOAD_FAVORITE, loadFavorite);
+        outState.putString(KEY_SORT_BY, sortBy);
     }
 
     /**
      * get the value of {@literal loadFavorite} we saved from {@literal onSaveInstanceState}
      * so that we can load favorites/all movies correctly even after configuration change
+     *
      * @param savedInstanceState
      */
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         if (null != savedInstanceState)
-            loadFavorite = savedInstanceState.getBoolean(KEY_LOAD_FAVORITE);
+            sortBy = savedInstanceState.getString(KEY_SORT_BY);
     }
 
 }

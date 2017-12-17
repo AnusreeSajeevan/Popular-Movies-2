@@ -142,7 +142,7 @@ public class Movie implements Parcelable{
     }
 
     public String getPosterPath() {
-        return MovieDBUtils.URL_POSTER_PATH + posterPath;
+        return posterPath;
     }
 
     public void setPosterPath(String posterPath) {

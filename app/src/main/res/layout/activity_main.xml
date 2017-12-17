@@ -8,6 +8,7 @@
     android:id="@+id/swipe_refresh_layout"
     tools:context=".ui.MainActivity">
     <FrameLayout
+        android:id="@+id/frame_layout"
         android:clipToPadding="false"
         android:layout_width="match_parent"
         android:layout_height="match_parent">

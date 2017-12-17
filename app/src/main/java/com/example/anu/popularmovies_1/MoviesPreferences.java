@@ -7,6 +7,7 @@ package com.example.anu.popularmovies_1;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.widget.EditText;
 
 import com.example.anu.popularmovies_1.utils.MovieDBUtils;
 
@@ -36,5 +37,15 @@ public class MoviesPreferences {
         String preferenceKey = context.getResources().getString(R.string.pref_sortby_key);
         return sharedPreferences.getString(preferenceKey, DEFAULT_SORT_BY_VALUE);
     }
+
+
+    public static void setUserPreferredSortByValue(Context context, String sortByVal){
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(context.getResources().getString(R.string.pref_sortby_key), sortByVal);
+        editor.commit();
+    }
+
+
 
 }

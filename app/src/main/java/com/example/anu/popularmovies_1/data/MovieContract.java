@@ -4,7 +4,9 @@ package com.example.anu.popularmovies_1.data;
  * Created by Design on 11-12-2017.
  */
 
+import android.net.Uri;
 import android.provider.BaseColumns;
+import android.support.v4.widget.SwipeRefreshLayout;
 
 /**
  * class which contains the contract for the tables and it's columns
@@ -29,6 +31,27 @@ public class MovieContract {
          * indicating if it is favirote or not
          */
         public static final String TABLE_NAME = "movie";
+
+        /**
+         * commonly we use package name as the authority
+         */
+        public static final String CONTENT_AUTHORITY = "com.example.anu.popularmovies_1";
+
+        /**
+         * use {@value CONTENT_AUTHORITY} to create the base content uri
+         */
+        public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+
+        /**
+         * define possible paths
+         */
+        public static final String PATH_MOVIE = "movie";
+
+        /**
+         * the content uri used to access movie table from th content provider
+         */
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIE).build();
+
 
         /**
          * a coulumn named _ID will be created automatically whenever a new row is being inserted into the table
