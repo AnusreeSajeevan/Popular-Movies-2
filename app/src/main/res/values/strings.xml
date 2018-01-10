@@ -32,4 +32,7 @@
     <string name="no_favorites_message">No Favorite Movies !!!</string>
 
     <string name="snackbar_message">No internet connection !!!\nShowing favorite movies</string>
+
+    <string name="review_count">%d reviews</string>
+    <string name="view_more">view moew</string>
 </resources>

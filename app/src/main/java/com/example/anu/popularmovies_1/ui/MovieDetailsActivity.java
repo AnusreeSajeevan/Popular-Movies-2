@@ -4,35 +4,47 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.example.anu.popularmovies_1.R;
-import com.example.anu.popularmovies_1.adapter.MovieHolder;
+import com.example.anu.popularmovies_1.adapter.ReviewAdapter;
 import com.example.anu.popularmovies_1.data.MovieContract;
 import com.example.anu.popularmovies_1.data.MovieDbHelper;
+import com.example.anu.popularmovies_1.loaders.ReviewLoader;
 import com.example.anu.popularmovies_1.model.Movie;
+import com.example.anu.popularmovies_1.model.Review;
 import com.example.anu.popularmovies_1.utils.CommonUtils;
 import com.example.anu.popularmovies_1.utils.MovieDBUtils;
+import com.example.anu.popularmovies_1.utils.NetworkUtils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MovieDetailsActivity extends AppCompatActivity {
+public class MovieDetailsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks {
 
     @BindView(R.id.img_backdrop)
     ImageView imgBackdrop;
@@ -54,11 +66,24 @@ public class MovieDetailsActivity extends AppCompatActivity {
     AppBarLayout appbarLayout;
     @BindView(R.id.btn_favorites)
     ToggleButton btnFavorite;
-
+    @BindView(R.id.txt_rating_label)
+    TextView txtRatingLabel;
+    @BindView(R.id.txt_language)
+    TextView txtLanguage;
+    @BindView(R.id.layout)
+    RelativeLayout layout;
+    @BindView(R.id.txt_review_count)
+    TextView txtReviewCount;
+    @BindView(R.id.recycler_view_reviews)
+    RecyclerView recyclerViewReviews;
+    @BindView(R.id.coordinator_layout)
+    CoordinatorLayout coordinatorLayout;
 
     private Movie movie;
     private MovieDbHelper movieDbHelper;
     private static final String TAG = MovieDetailsActivity.class.getSimpleName();
+    private ReviewAdapter reviewAdapter;
+    private static final int REVIEW_LOADER_ID = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,21 +135,18 @@ public class MovieDetailsActivity extends AppCompatActivity {
                     contentValues.put(MovieContract.MovieEntry.KEY_COLUMN_RELEASE_DATE, movie.getReleaseDate());
                     contentValues.put(MovieContract.MovieEntry.KEY_COLUMN_OVERVIEW, movie.getOverview());
                     Uri uri = getContentResolver().insert(MovieContract.MovieEntry.CONTENT_URI, contentValues);
-                    if(null != uri){
-                         checked = 1;
-                    }
-                    else {
+                    if (null != uri) {
+                        checked = 1;
+                    } else {
                         checked = 0;
                     }
-                }
-                else {
+                } else {
                     String movieId = String.valueOf(movie.getId());
                     int deleted = getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI.buildUpon().appendPath(movieId).build(),
                             null, null);
-                    if (deleted>0){
-                         checked = 0;
-                    }
-                    else {
+                    if (deleted > 0) {
+                        checked = 0;
+                    } else {
                         checked = 1;
                     }
                 }
@@ -135,7 +157,20 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
         populateMovieDetails();
 
+        if (NetworkUtils.isNetworkAvailable(this)) {
+            setupReviews();
+        }
+    }
 
+    /**
+     * method to set up review recyclerviews
+     */
+    private void setupReviews() {
+        reviewAdapter = new ReviewAdapter(this);
+        recyclerViewReviews.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewReviews.setAdapter(reviewAdapter);
+        recyclerViewReviews.setNestedScrollingEnabled(false);
+        getSupportLoaderManager().initLoader(REVIEW_LOADER_ID, null, this);
     }
 
     /**
@@ -209,14 +244,14 @@ public class MovieDetailsActivity extends AppCompatActivity {
     /**
      * method to set favorite based either on the value retrieved rom local db
      * or when user click on the favorite
+     *
      * @param isFavorite favorite or not
      */
     private void setFavorite(int isFavorite) {
         if (isFavorite == 1) {
             btnFavorite.setChecked(true);
             btnFavorite.setBackgroundResource(R.drawable.ic_favorite);
-        }
-        else {
+        } else {
             btnFavorite.setChecked(false);
             btnFavorite.setBackgroundResource(R.drawable.ic_not_favorite);
         }
@@ -277,4 +312,49 @@ public class MovieDetailsActivity extends AppCompatActivity {
         setResult(RESULT_OK, intent);
         super.onBackPressed();
     }
+
+    @Override
+    public Loader onCreateLoader(int id, Bundle args) {
+        switch (id){
+            case REVIEW_LOADER_ID:
+                return new ReviewLoader(this, movie.getId());
+                default:
+                    throw new RuntimeException("Loader not implemented");
+        }
+    }
+
+    @Override
+    public void onLoadFinished(Loader loader, Object data) {
+        int loaderId = loader.getId();
+        switch (loaderId){
+            case REVIEW_LOADER_ID:
+                Log.d(TAG, "data : " + data);
+                reviewAdapter.setReviewList((List<Review>) data);
+                setReviewCount(((List<Review>) data).size());
+                break;
+                default:
+                    throw new RuntimeException("Loader not implemented");
+        }
+    }
+
+    /**
+     * method to set nyumber of reviews
+     */
+    private void setReviewCount(int count) {
+        txtReviewCount.setText(getResources().getString(R.string.review_count, count));
+    }
+
+    @Override
+    public void onLoaderReset(Loader loader) {
+        int loaderId = loader.getId();
+        switch (loaderId){
+            case REVIEW_LOADER_ID:
+                reviewAdapter.setReviewList(null);
+                setReviewCount(0);
+                break;
+                default:
+                    throw new RuntimeException("Loader not implemented");
+        }
+    }
+
 }
