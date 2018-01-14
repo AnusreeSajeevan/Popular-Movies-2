@@ -1,12 +1,7 @@
 package com.example.anu.popularmovies_1.data;
 
-/**
- * Created by Design on 11-12-2017.
- */
-
 import android.net.Uri;
 import android.provider.BaseColumns;
-import android.support.v4.widget.SwipeRefreshLayout;
 
 /**
  * class which contains the contract for the tables and it's columns
@@ -14,7 +9,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 public class MovieContract {
 
     /**
-     * to prevent someone accidentaly create an instance of the class
+     * to prevent someone accidentally create an instance of the class
      * we will make the constructor private
      */
     private MovieContract(){}
@@ -28,7 +23,7 @@ public class MovieContract {
 
         /**
          * name of the table which will store the movie id and favorite status,
-         * indicating if it is favirote or not
+         * indicating if it is favorite or not
          */
         public static final String TABLE_NAME = "movie";
 
@@ -53,7 +48,7 @@ public class MovieContract {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIE).build();
 
 
-        /**
+        /*
          * a coulumn named _ID will be created automatically whenever a new row is being inserted into the table
          */
 

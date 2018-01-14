@@ -6,16 +6,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.example.anu.popularmovies_1.utils.MovieDBUtils;
-import com.example.anu.popularmovies_1.utils.NetworkUtils;
-
-/**
- * Created by Design on 11-12-2017.
- */
-
 /**
  * {@link SQLiteOpenHelper} is responsible for creating the database for the first time,
- * and to upgrade the databse whenever the scheme changes
+ * and to upgrade the databsae whenever the scheme changes
  */
 public class MovieDbHelper extends SQLiteOpenHelper{
 
@@ -38,7 +31,7 @@ public class MovieDbHelper extends SQLiteOpenHelper{
 
     /**
      *
-     * @param context
+     * @param context called context
      */
     public MovieDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -52,7 +45,7 @@ public class MovieDbHelper extends SQLiteOpenHelper{
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
 
-        /**
+        /*
          * query to perform create movie table operation
          */
         String CREATE_MOVIE_TABLE_QUERY = "CREATE TABLE " + MovieContract.MovieEntry.TABLE_NAME + " (" +
@@ -71,7 +64,7 @@ public class MovieDbHelper extends SQLiteOpenHelper{
     }
 
     /**
-     * method to upgrade the databse and to make sure that the database schema is upto date
+     * method to upgrade the database and to make sure that the database schema is up to date
      * @param sqLiteDatabase instance of the database to be upgraded
      * @param i
      * @param i1
@@ -134,7 +127,7 @@ public class MovieDbHelper extends SQLiteOpenHelper{
      * method to get all user's favorite movies
      * @return cursor containing all favorite movies
      */
-    public Cursor getFavoiteMovies(){
+    public Cursor getFavoriteMovies(){
         sqLiteDatabase = getReadableDatabase();
         String query = "SELECT * FROM " + MovieContract.MovieEntry.TABLE_NAME +
                 " WHERE " + MovieContract.MovieEntry.KEY_COLUMN_FAVORITE+ " = " + 1;

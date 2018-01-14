@@ -31,7 +31,7 @@
     <string name="favorites">Favorites</string>
     <string name="no_favorites_message">No Favorite Movies !!!</string>
 
-    <string name="snackbar_message">No internet connection !!!\nShowing favorite movies</string>
+    <string name="snackbar_message">No internet connection !!! Showing favorite movies</string>
 
     <plurals name="review_count">
         <item quantity="zero">%d reviews</item>
@@ -39,7 +39,7 @@
         <item quantity="other">%d reviews</item>
     </plurals>
 
-    <string name="view_more">view moew</string>
+    <string name="view_more">view more</string>
     <string name="reviews">Reviews</string>
     <string name="no_trailers">No trailers available</string>
 </resources>

@@ -3,7 +3,6 @@ package com.example.anu.popularmovies_1.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.example.anu.popularmovies_1.utils.MovieDBUtils;
 import com.google.gson.annotations.SerializedName;
 
 /**

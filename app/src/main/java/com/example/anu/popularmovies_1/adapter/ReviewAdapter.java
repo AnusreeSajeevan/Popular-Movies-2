@@ -1,27 +1,15 @@
 package com.example.anu.popularmovies_1.adapter;
 
 import android.content.Context;
-import android.support.transition.TransitionManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.example.anu.popularmovies_1.R;
 import com.example.anu.popularmovies_1.model.Review;
-import com.example.anu.popularmovies_1.utils.CommonUtils;
-
-import org.w3c.dom.Text;
 
 import java.util.List;
-
-import butterknife.BindView;
-
-/**
- * Created by Design on 09-01-2018.
- */
 
 public class ReviewAdapter extends RecyclerView.Adapter<ReviewHolder> {
 

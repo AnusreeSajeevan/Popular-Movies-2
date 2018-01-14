@@ -12,7 +12,7 @@ public class MoviesJsonUtils {
 
     /**
      * method to get JSONObject from network response
-     * @param response the response to get jasonobject from
+     * @param response the response to get jason object from
      * @return json object
      * @throws JSONException exception
      */

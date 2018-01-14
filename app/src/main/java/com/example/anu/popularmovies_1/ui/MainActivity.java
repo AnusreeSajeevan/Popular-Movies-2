@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
 
     static String KEY_MOVIE_RESPONSE = "movie_response";
     static String KEY_CLICKED_POSITION = "clicked_position";
-    static String KEY_SORT_BY = "sory_by";
+    static String KEY_SORT_BY = "sort_by";
 
     LoaderManager.LoaderCallbacks callBacks = MainActivity.this;
 
@@ -87,12 +87,11 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
     private static final int mPosition = RecyclerView.NO_POSITION;
 
     /**
-     * Loader calbacks to load user's favorite movies from local database
+     * Loader callbacks to load user's favorite movies from local database
      */
     private LoaderManager.LoaderCallbacks<Cursor> cursorLoaderCallbacks = new LoaderManager.LoaderCallbacks<Cursor>() {
         @Override
         public Loader<Cursor> onCreateLoader(int loaderId, Bundle args) {
-            Log.d("CheckingFlow","onCreateLoader");
             switch (loaderId) {
                 case FAVORITE_MOVIES_LOADER_ID:
                     return new CursorLoader(MainActivity.this, MovieContract.MovieEntry.CONTENT_URI,
@@ -106,7 +105,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-            Log.d("CheckingFlow","onLoadFinished");
             movieList.clear();
             if (swipeRefreshLayout.isRefreshing())
                 swipeRefreshLayout.setRefreshing(false);
@@ -147,7 +145,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
      * method to show appropriate message when there is no favorite movies
      */
     private void showNoFavorites() {
-        Log.d("CheckingFlow","showNoFavorites");
         if (swipeRefreshLayout.isRefreshing())
             swipeRefreshLayout.setRefreshing(false);
 
@@ -163,8 +160,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        /**
-         * restore the saved data
+        /*
+         restore the saved data
          */
         if (null != savedInstanceState)
             sortBy = savedInstanceState.getString(KEY_SORT_BY);
@@ -185,8 +182,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                Log.d("CheckingFlow","onRefresh");
-                initalizeOrRestartLoader();
+                initializeOrRestartLoader();
             }
         });
         setupMoviesList();
@@ -198,20 +194,18 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
      * finally call {@link #onCreateLoader(int, Bundle)} )}
      */
     public void setupMoviesList() {
-        Log.d("CheckingFlow","setupMoviesList");
         movieAdapter = new MovieAdapter(MainActivity.this, movieList, this);
         int columnCount = setColumnCount();
 
         recyclerviewMovies.setLayoutManager(new GridLayoutManager(MainActivity.this, columnCount));
         recyclerviewMovies.setAdapter(movieAdapter);
-        initalizeOrRestartLoader();
+        initializeOrRestartLoader();
     }
 
     /*
       get the user preferred sort order and set title
        */
     private void getSortOrderAndSetup() {
-        Log.d("CheckingFlow","getSortOrderAndSetup");
         showRefreshing();
         //get preference value
         sortBy = MoviesPreferences.getUserPreferredSortByValue(MainActivity.this);
@@ -223,7 +217,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
      *method to show refreshing
      */
     private void showRefreshing() {
-        Log.d("CheckingFlow","showRefreshing");
         if (!swipeRefreshLayout.isRefreshing())
             swipeRefreshLayout.setRefreshing(true);
     }
@@ -233,7 +226,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
      * set action bar title to the sort order
      */
     private void setTitle(String sortBy) {
-        Log.d("CheckingFlow","sortBy : " + sortBy);
         if (null != getSupportActionBar()) {
             if (sortBy.equalsIgnoreCase(getResources().getString(R.string.pref_sortby_popular_value)))
                 getSupportActionBar().setTitle(getResources().getString(R.string.pref_sortby_popular_label));
@@ -245,14 +237,13 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
     }
 
     /**
-     * method over riden to redirect to {@link MovieDetailsActivity}
+     * method overriden to redirect to {@link MovieDetailsActivity}
      * on clicking movie thumbnail
      *
      * @param pos clicked thumbnail position
      */
     @Override
     public void onThumbnailClick(int pos) {
-        Log.d("CheckingFlow","onThumbnailClick");
         Intent iDetail = new Intent(MainActivity.this, MovieDetailsActivity.class);
 
         Bundle bundle = new Bundle();
@@ -265,7 +256,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
 
     @Override
     public Loader<MovieResponse> onCreateLoader(int id, Bundle args) {
-        Log.d("CheckingFlow","onCreateLoader");
         switch (id) {
             case MOVIES_LOADER_ID:
                 return new AsyncTaskLoader<MovieResponse>(this) {
@@ -319,7 +309,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
 
     @Override
     public void onLoadFinished(Loader<MovieResponse> loader, MovieResponse data) {
-        Log.d("CheckingFlow","onLoadFinished");
         movieList.clear();
 
         recyclerviewMovies.setVisibility(View.VISIBLE);
@@ -360,7 +349,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
      * @param error the error message to be shown
      */
     private void showError(String error) {
-        Log.d("CheckingFlow","showError");
         if (swipeRefreshLayout.isRefreshing())
             swipeRefreshLayout.setRefreshing(false);
         recyclerviewMovies.setVisibility(View.GONE);
@@ -393,7 +381,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        Log.d("CheckingFlow","onSharedPreferenceChanged");
         PREFERENCE_UPDATED = true;
     }
 
@@ -402,7 +389,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
      */
     @Override
     protected void onDestroy() {
-        Log.d("CheckingFlow","onDestroy");
         super.onDestroy();
         PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
     }
@@ -414,26 +400,21 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
     protected void onStart() {
         super.onStart();
 
-
-        Log.d("CheckingFlow","onStart");
-        Log.d("PREFERENCE_UPDATED","PREFERENCE_UPDATED");
         /*
           fetch movies again
           if the user preference for the sort order have been changed
           and set the flag false
          */
         if (PREFERENCE_UPDATED) {
-            initalizeOrRestartLoader();
+            initializeOrRestartLoader();
             PREFERENCE_UPDATED = false;
         }
     }
 
     /**
-     * method responsible for either initializing or restaring loaders based on user's sort preference
+     * method responsible for either initializing or restarting loaders based on user's sort preference
      */
-    private void initalizeOrRestartLoader() {
-        Log.d("CheckingFlow","initalizeOrRestartLoader");
-        Log.d("CheckingFlow","initalizeOrRestartLoader : sortBy : " + sortBy);
+    private void initializeOrRestartLoader() {
         getSortOrderAndSetup();
         if (sortBy.equalsIgnoreCase(getResources().getString(R.string.pref_sortby_favorites_value))) {
             initializeOrRestartFavoritesLoader();
@@ -457,7 +438,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
      */
     private void initializeOrRestartFavoritesLoader() {
         getSupportLoaderManager().destroyLoader(MOVIES_LOADER_ID);
-        Log.d("CheckingFlow","initializeOrRestartFavoritesLoader");
         Loader loaderFavorites = getSupportLoaderManager().getLoader(FAVORITE_MOVIES_LOADER_ID);
         if (null == loaderFavorites)
             getSupportLoaderManager().initLoader(FAVORITE_MOVIES_LOADER_ID, null, cursorLoaderCallbacks);
@@ -468,10 +448,10 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
     }
 
     /**
-     * method to show snackbar whle showing faorite movies when there is no internet connection
+     * method to show snackbar while showing favorite movies when there is no internet connection
      */
     private void showSnackBar() {
-        Snackbar.make(frameLayout, "No intenet connction, Showing favorite movies", Snackbar.LENGTH_LONG).show();
+        Snackbar.make(frameLayout, getResources().getString(R.string.snackbar_message), Snackbar.LENGTH_LONG).show();
         setTitle(getResources().getString(R.string.pref_sortby_favorites_value));
     }
 
@@ -499,8 +479,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
      * method to get favorite movies from local database
      */
     private void getFavorites() {
-        Log.d("CheckingFlow","getFavorites");
-        Cursor cursorFavorites = movieDbHelper.getFavoiteMovies();
+        Cursor cursorFavorites = movieDbHelper.getFavoriteMovies();
         movieList.clear();
         movieAdapter.notifyDataSetChanged();
         tvError.setVisibility(View.GONE);
@@ -538,21 +517,18 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
 
     @Override
     protected void onResume() {
-
-        Log.d("CheckingFlow","onResume");
         super.onResume();
     }
 
     /**
-     * method ovveride to show the faorite status when returning to MainActivity from (@link {@link MovieDetailsActivity}
-     * @param requestCode
-     * @param resultCode
-     * @param data
+     * method override to show the favorite status when returning to MainActivity from (@link {@link MovieDetailsActivity}
+     * @param requestCode code associated with request
+     * @param resultCode code associated with result
+     * @param data data contained in the intent
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.d("CheckingFlow","onActivityResult");
         if (requestCode == REQUEST_CODE_DETAILS) {
             if (resultCode == RESULT_OK) {
                 String fav = getResources().getString(R.string.pref_sortby_favorites_value);
@@ -562,9 +538,11 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
                     movieAdapter.notifyDataSetChanged();
 
                     Bundle bundle = data.getExtras();
+                    assert bundle != null;
                     Movie movie = bundle.getParcelable(MainActivity.KEY_MOVIE_RESPONSE);
                     int pos = bundle.getInt(KEY_CLICKED_POSITION, -1);
                     if (pos != -1) {
+                        assert movie != null;
                         movieList.get(pos).setIsFavorite(movie.isFavorite());
                         movieAdapter.notifyDataSetChanged();
                     }
@@ -575,13 +553,12 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
 
     /**
      * save the value of {@literal loadFavorite} here,
-     * so thet we can retrieve it in {@literal onRestoreInstanceState} when configuration changes
+     * so that we can retrieve it in {@literal onRestoreInstanceState} when configuration changes
      *
      * @param outState
      */
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        Log.d("CheckingFlow","onSaveInstanceState");
         super.onSaveInstanceState(outState);
         outState.putString(KEY_SORT_BY, sortBy);
     }
@@ -594,7 +571,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.OnCl
      */
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        Log.d("CheckingFlow","onRestoreInstanceState");
         super.onRestoreInstanceState(savedInstanceState);
         if (null != savedInstanceState)
             sortBy = savedInstanceState.getString(KEY_SORT_BY);

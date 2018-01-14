@@ -7,7 +7,6 @@ package com.example.anu.popularmovies_1;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.widget.EditText;
 
 import com.example.anu.popularmovies_1.utils.MovieDBUtils;
 
@@ -43,7 +42,7 @@ public class MoviesPreferences {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(context.getResources().getString(R.string.pref_sortby_key), sortByVal);
-        editor.commit();
+        editor.apply();
     }
 
 

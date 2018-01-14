@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.example.anu.popularmovies_1.R;
@@ -37,7 +36,7 @@ public class ReviewsActivity extends AppCompatActivity {
     }
 
     /**
-     * method to set up review recyclerviews
+     * method to set up review recycler views
      */
     private void setupReviews() {
         reviewList = getIntent().getParcelableArrayListExtra("reviews");

@@ -5,10 +5,6 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by Design on 09-01-2018.
- */
-
 public class Review implements Parcelable{
 
     private String id;

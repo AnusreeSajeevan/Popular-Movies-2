@@ -3,7 +3,6 @@
     <dimen name="margin_20">20dp</dimen>
     <dimen name="margin_5">5dp</dimen>
     <dimen name="margin_10">10dp</dimen>
-    <dimen name="margin_40">40dp</dimen>
     <dimen name="margin_16">16dp</dimen>
 
     <dimen name="linespace_3">3sp</dimen>
@@ -14,7 +13,6 @@
     <dimen name="text_size_12">12sp</dimen>
     <dimen name="text_size_18">18sp</dimen>
     <dimen name="author_text_size">16sp</dimen>
-    <dimen name="review_text_size">15sp</dimen>
 
     <dimen name="details_left_margin">160dp</dimen>
     <dimen name="overview_margin_top">20sp</dimen>

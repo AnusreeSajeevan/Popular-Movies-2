@@ -10,20 +10,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
-
-import java.nio.charset.MalformedInputException;
-
-/**
- * Created by Design on 17-12-2017.
- */
 
 public class MovieProvider extends ContentProvider {
 
     public static final int CODE_FAVORITES = 100;
     public static final int CODE_MOVIE_WITH_ID = 101;
 
-    public static MovieDbHelper movieDbHelper;
+    public MovieDbHelper movieDbHelper;
 
     public static UriMatcher sUriMatcher = buildUriMatcher();
 
@@ -80,13 +73,13 @@ public class MovieProvider extends ContentProvider {
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues contentValues) {
         SQLiteDatabase sqLiteDatabase = movieDbHelper.getWritableDatabase();
-        Uri retrutnUri;
+        Uri returnUri;
         int uriMatch = sUriMatcher.match(uri);
         switch (uriMatch){
             case CODE_FAVORITES:
                 long id = sqLiteDatabase.insert(MovieContract.MovieEntry.TABLE_NAME, null, contentValues);
                 if (id > 0){
-                    retrutnUri = ContentUris.withAppendedId(MovieContract.MovieEntry.CONTENT_URI, id);
+                    returnUri = ContentUris.withAppendedId(MovieContract.MovieEntry.CONTENT_URI, id);
                 }
                 else {
                     throw  new SQLException("Cannot insert movie");
@@ -96,7 +89,7 @@ public class MovieProvider extends ContentProvider {
                     throw new UnsupportedOperationException("Unknown uri : " + uri);
 
         }
-        return retrutnUri;
+        return returnUri;
     }
 
     @Override

@@ -27,7 +27,7 @@ public class MovieDBUtils {
 
     public static final String TRAILER_BASE_YOUTUBE_PATH = "https://www.youtube.com/watch?v=";
 
-    //paths to fetch trainer thumnail & it's image
+    //paths to fetch trainer thumbnail & it's image
     public static final String TRAILER_THUMBNAIL_IMAGE_PATH = "http://img.youtube.com/vi/";
     public static final String TRAILER_THUMBNAIL_IMAGE_0= "/0.jpg";
     public static final String TRAILER_THUMBNAIL_IMAGE_1= "/1.jpg";

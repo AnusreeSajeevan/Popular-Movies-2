@@ -3,12 +3,6 @@ package com.example.anu.popularmovies_1.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.gson.annotations.SerializedName;
-
-/**
- * Created by Design on 09-01-2018.
- */
-
 public class Trailer implements Parcelable{
 
     private String id;

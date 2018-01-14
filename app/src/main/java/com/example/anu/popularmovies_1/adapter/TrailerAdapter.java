@@ -5,8 +5,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.example.anu.popularmovies_1.R;
 import com.example.anu.popularmovies_1.model.Trailer;
@@ -14,12 +12,6 @@ import com.example.anu.popularmovies_1.utils.MovieDBUtils;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
-
-import butterknife.BindView;
-
-/**
- * Created by Design on 09-01-2018.
- */
 
 public class TrailerAdapter extends RecyclerView.Adapter<TrailerHolder> {
 

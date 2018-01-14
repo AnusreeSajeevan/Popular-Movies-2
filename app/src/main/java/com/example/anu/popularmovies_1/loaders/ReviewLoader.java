@@ -1,12 +1,6 @@
 package com.example.anu.popularmovies_1.loaders;
 
-/**
- * Created by Design on 09-01-2018.
- */
-
-
 import android.content.Context;
-import android.os.AsyncTask;
 import android.support.v4.content.AsyncTaskLoader;
 
 import com.example.anu.popularmovies_1.model.Review;

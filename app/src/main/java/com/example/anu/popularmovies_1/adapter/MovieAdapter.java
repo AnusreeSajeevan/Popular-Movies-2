@@ -4,21 +4,17 @@ import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.CompoundButton;
-import android.widget.Toast;
 
 import com.example.anu.popularmovies_1.R;
 import com.example.anu.popularmovies_1.data.MovieContract;
 import com.example.anu.popularmovies_1.data.MovieDbHelper;
 import com.example.anu.popularmovies_1.model.Movie;
 import com.example.anu.popularmovies_1.utils.MovieDBUtils;
-import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -56,7 +52,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieHolder> {
 
     @Override
     public void onBindViewHolder(final MovieHolder holder, final int position) {
-        final Movie movie = movieList.get(position);
+        final Movie movie = movieList.get(holder.getAdapterPosition());
         holder.txtMovieName.setText(movie.getTitle());
         holder.txtRating.setText(String.valueOf(movie.getVoteAverage()));
         Picasso.with(context)
@@ -68,15 +64,15 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieHolder> {
         holder.imgThumbnail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                clickHandleListener.onThumbnailClick(position);
+                clickHandleListener.onThumbnailClick(holder.getAdapterPosition());
             }
         });
         
-        setEnterAnimation(holder.cardView, position);
+        setEnterAnimation(holder.cardView, holder.getAdapterPosition());
 
-        /**
-         * if database does not already contains a row for the particular movie, cursor count will be 0
-         * insert new row for the movie if cursor count is 0
+        /*
+          if database does not already contains a row for the particular movie, cursor count will be 0
+          insert new row for the movie if cursor count is 0
          */
         Cursor cursor = movieDbHelper.getMovieById(movie.getId());
         int count = cursor.getCount();  //return the cursor count
@@ -98,7 +94,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieHolder> {
     /**
      * method to set favorite based either on the value retrieved rom local db
      * or when user click on the favorite
-     * @param holder
+     * @param holder current holder
      * @param isFavorite favorite or not
      */
     private void setFavorite(MovieHolder holder, int isFavorite) {

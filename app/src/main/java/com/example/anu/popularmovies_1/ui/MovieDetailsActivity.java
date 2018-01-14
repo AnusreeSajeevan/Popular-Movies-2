@@ -117,7 +117,7 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderMan
          */
         movie = getIntent().getParcelableExtra(MainActivity.KEY_MOVIE_RESPONSE);
 
-        /**
+        /*
          * set addOnOffsetChangedListener to appbar to indicate if it is expanded or collapsed
          * show back button if it is collapsed, hide otherwise
          */
@@ -129,7 +129,7 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderMan
             }
         });
 
-        /**
+        /*
          * listener registered to detect when user changes favorite
          */
         btnFavorite.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -144,7 +144,7 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderMan
                         getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI.buildUpon().appendPath(movieId).build(),
                                 null, null);
                     }
-                    /**
+                    /*
                      * insert favorites into uer's favorite movies collection
                      */
                     int favorite = 1;
@@ -199,7 +199,7 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderMan
     }
 
     /**
-     * method to set up review recyclerviews
+     * method to set up review recycler views
      */
     private void loadReviews() {
         getSupportLoaderManager().initLoader(REVIEW_LOADER_ID, null, this);
@@ -236,7 +236,6 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderMan
         collapsingToolbarLayout.setTitle(movie.getOriginalTitle());
         collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(R.color.colorTransparent));
 
-        Log.d("checkPaths","movie.getBackdropPath() : " + movie.getBackdropPath());
 
         /*
           set backdrop image using picasso
@@ -332,7 +331,7 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderMan
     }
 
     /**
-     * metod ovveriden to send the favorite sttus back to MainActivity
+     * method overriden to send the favorite status back to MainActivity
      */
     @Override
     public void onBackPressed() {
@@ -364,12 +363,10 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderMan
         int loaderId = loader.getId();
         switch (loaderId) {
             case REVIEW_LOADER_ID:
-                Log.d(TAG, "data : " + data);
                 reviewList = (List<Review>) data;
                 setReviewCount(reviewList.size());
                 break;
             case TRAILER_LOADER_ID:
-                Log.d(TAG, "data : " + data);
                 trailerList = (List<Trailer>) data;
                 trailerAdapter.setTrailerList((List<Trailer>) data);
                 break;
@@ -379,7 +376,7 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderMan
     }
 
     /**
-     * method to set nyumber of reviews
+     * method to set number of reviews
      */
     private void setReviewCount(int count) {
         reviewCount = count;
@@ -416,7 +413,7 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderMan
         Intent intentYoutube = new Intent(Intent.ACTION_VIEW);
         intentYoutube.setData(uriVideo);
 
-        /**
+        /*
          * start the intent only if sutable app exists
          */
         if (intentYoutube.resolveActivity(getPackageManager()) != null)
@@ -425,6 +422,10 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderMan
             Toast.makeText(this, "Cannot play video", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * method to redirect to the {@link ReviewsActivity}
+     * if at leat one reviews exists for the movie
+     */
     @OnClick(R.id.btn_review_count)
     public void clickOnReview() {
         if (reviewCount != 0) {

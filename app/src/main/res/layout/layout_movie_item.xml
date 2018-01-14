@@ -34,7 +34,9 @@
             <TextView
                 android:layout_marginTop="@dimen/margin_5"
                 android:layout_below="@+id/txt_movie_name"
+                android:layout_toEndOf="@+id/btn_favorites"
                 android:layout_toRightOf="@+id/btn_favorites"
+                android:drawableStart="@drawable/ic_rating"
                 android:drawableLeft="@drawable/ic_rating"
                 android:drawablePadding="@dimen/margin_5"
                 android:id="@+id/txt_rating"
