@@ -438,7 +438,11 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderMan
      * it will open all the available applications to share the data
      */
     @OnClick(R.id.fab_share)
-    public void shareTrailer() {
-
+    public void shareTrailerLink() {
+        Intent iShare = ShareCompat.IntentBuilder.from(this)
+                .setType("text/plain")
+                .setText(MovieDBUtils.TRAILER_BASE_YOUTUBE_PATH + trailerList.get(0).getKey() + SHARE_INTENT_HASHTAG)
+                .getIntent();
+        startActivity(iShare);
     }
 }
