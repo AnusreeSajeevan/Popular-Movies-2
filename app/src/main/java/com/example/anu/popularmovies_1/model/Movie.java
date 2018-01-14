@@ -79,7 +79,7 @@ public class Movie implements Parcelable{
     };
 
     public String getBackdropPath() {
-        return MovieDBUtils.URL_BACKDROP_PATH + backdropPath;
+        return /*MovieDBUtils.URL_BACKDROP_PATH + */backdropPath;
     }
 
     public void setBackdropPath(String backdropPath) {

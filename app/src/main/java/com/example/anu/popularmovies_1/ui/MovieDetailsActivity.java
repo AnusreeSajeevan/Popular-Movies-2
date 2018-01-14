@@ -244,7 +244,7 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderMan
           as well as the corresponding colors for overlaid text
          */
         Picasso.with(this)
-                .load(movie.getBackdropPath())
+                .load(MovieDBUtils.URL_BACKDROP_PATH +movie.getBackdropPath())
                 .into(imgBackdrop, new Callback() {
                     @Override
                     public void onSuccess() {
