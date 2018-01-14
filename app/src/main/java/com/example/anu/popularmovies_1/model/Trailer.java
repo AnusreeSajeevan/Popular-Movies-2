@@ -20,9 +20,14 @@ public class Trailer implements Parcelable{
     private int size;
     private String type;
 
+    public String getName() {
+        return name;
+    }
+
     protected Trailer(Parcel in) {
         id = in.readString();
         iso_639_1 = in.readString();
+
         iso_3166_1 = in.readString();
         key = in.readString();
         name = in.readString();

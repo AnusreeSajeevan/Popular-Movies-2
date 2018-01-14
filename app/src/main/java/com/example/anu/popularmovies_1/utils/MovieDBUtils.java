@@ -1,5 +1,7 @@
 package com.example.anu.popularmovies_1.utils;
 
+import com.example.anu.popularmovies_1.BuildConfig;
+
 /**
  * Created by Design on 08-12-2017.
  *
@@ -8,7 +10,7 @@ package com.example.anu.popularmovies_1.utils;
 public class MovieDBUtils {
 
     //api key to access TMDB apis
-    public static final String API_KEY = "";
+    public static final String API_KEY = BuildConfig.API_KEY;
 
     //base url to access movies api
     public static final String BASE_URL = "http://api.themoviedb.org/3/";

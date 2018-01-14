@@ -34,6 +34,14 @@
                 app:layout_collapseMode="pin"/>
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_share"
+        android:layout_width="wrap_content"
+        android:src="@drawable/ic_share"
+        android:layout_height="wrap_content"
+        app:layout_anchorGravity="bottom|end"
+        android:layout_marginRight="@dimen/margin_16"
+        app:layout_anchor="@id/appbar_layout"/>
     <ImageView
         android:background="@color/colorPrimary"
         android:elevation="@dimen/detail_image_elevation"
@@ -63,6 +71,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/details_left_margin">
                 <TextView
+                    android:layout_marginTop="@dimen/margin_20"
                     android:ellipsize="end"
                     android:maxLines="2"
                     tools:text="movie name"

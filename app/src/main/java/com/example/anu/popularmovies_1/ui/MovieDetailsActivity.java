@@ -11,7 +11,9 @@ import android.os.Parcelable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.app.ShareCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
@@ -85,6 +87,8 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderMan
     CoordinatorLayout coordinatorLayout;
     @BindView(R.id.recycler_view_trailers)
     RecyclerView recyclerViewTrailers;
+    @BindView(R.id.fab_share)
+    FloatingActionButton fabShare;
 
     private Movie movie;
     private MovieDbHelper movieDbHelper;
@@ -95,6 +99,8 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderMan
     private static final int TRAILER_LOADER_ID = 20;
     private int reviewCount = 0;
     private List<Review> reviewList;
+    private List<Trailer> trailerList;
+    private static final String SHARE_INTENT_HASHTAG = "\n#PopularMoviesApp";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -230,6 +236,8 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderMan
         collapsingToolbarLayout.setTitle(movie.getOriginalTitle());
         collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(R.color.colorTransparent));
 
+        Log.d("checkPaths","movie.getBackdropPath() : " + movie.getBackdropPath());
+
         /*
           set backdrop image using picasso
           and set callback inorder to get access to the primary colors in an image,
@@ -362,6 +370,7 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderMan
                 break;
             case TRAILER_LOADER_ID:
                 Log.d(TAG, "data : " + data);
+                trailerList = (List<Trailer>) data;
                 trailerAdapter.setTrailerList((List<Trailer>) data);
                 break;
             default:
@@ -392,6 +401,7 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderMan
                 setReviewCount(0);
                 break;
             case TRAILER_LOADER_ID:
+                trailerList = null;
                 trailerAdapter.setTrailerList(null);
                 break;
             default:
@@ -417,10 +427,18 @@ public class MovieDetailsActivity extends AppCompatActivity implements LoaderMan
 
     @OnClick(R.id.btn_review_count)
     public void clickOnReview() {
-        if (reviewCount!=0){
+        if (reviewCount != 0) {
             Intent iReview = new Intent(MovieDetailsActivity.this, ReviewsActivity.class);
             iReview.putParcelableArrayListExtra("reviews", (ArrayList<? extends Parcelable>) reviewList);
             startActivity(iReview);
         }
+    }
+    /**
+     * method to share the first trailer
+     * it will open all the available applications to share the data
+     */
+    @OnClick(R.id.fab_share)
+    public void shareTrailer() {
+
     }
 }

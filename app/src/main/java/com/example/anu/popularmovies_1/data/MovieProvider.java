@@ -126,10 +126,7 @@ public class MovieProvider extends ContentProvider {
             case CODE_MOVIE_WITH_ID:
                 String selection = MovieContract.MovieEntry.KEY_COLUMN_MOVIE_ID + " = ? ";
                 String[] selectionArgs = new String[]{uri.getLastPathSegment()};
-                Log.d(TAG, "selection : " + selection);
-                Log.d(TAG, "selectionArgs : " + selectionArgs);
                 favoriteUpdated = sqLiteDatabase.update(MovieContract.MovieEntry.TABLE_NAME, contentValues, selection, selectionArgs);
-                Log.d(TAG, "favoriteUpdated : " + favoriteUpdated);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri : " + uri);
