@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.example.anu.popularmovies_1.R;
 import com.example.anu.popularmovies_1.model.Review;
+import com.example.anu.popularmovies_1.utils.CommonUtils;
 
 import org.w3c.dom.Text;
 
@@ -42,34 +43,6 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewHolder> {
         Review review = reviewList.get(position);
         holder.txtAuthor.setText(review.getAuthor());
         holder.txtReview.setText(review.getReview());
-
-        Layout l = holder.txtReview.getLayout();
-        if (l != null) {
-            int lines = l.getLineCount();
-            if (lines > 0)
-                if (l.getEllipsisCount(lines - 1) > 0) {
-                holder.btnViewMore.setVisibility(View.VISIBLE);
-                }
-                else
-                    holder.btnViewMore.setVisibility(View.GONE);
-        }
-        holder.txtReview.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Layout l = holder.txtReview.getLayout();
-                if (l != null) {
-                    int lines = l.getLineCount();
-                    if (lines > 0)
-                        if (l.getEllipsisCount(lines - 1) > 0) {
-                            TransitionManager.beginDelayedTransition(holder.layoutMain);
-                            holder.txtReview.setMaxLines(100);
-                        } else {
-                            TransitionManager.beginDelayedTransition(holder.layoutMain);
-                            holder.txtReview.setMaxLines(3);
-                        }
-                }
-            }
-        });
     }
 
     @Override

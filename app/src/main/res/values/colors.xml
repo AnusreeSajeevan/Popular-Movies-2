@@ -13,5 +13,7 @@
     <color name="transparent">#00ffffff</color>
     <color name="hyperlinkDefaultColor">#0000EE</color>
     <color name="greyText">#818184</color>
-    <color name="review_background">#f9f9f9</color>
+    <color name="review_background">#f2f0f0</color>
+    <color name="overlay">#80555656</color>
+    <color name="light_black">#494848</color>
 </resources>

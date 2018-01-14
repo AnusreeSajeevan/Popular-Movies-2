@@ -10,6 +10,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.nio.charset.MalformedInputException;
 
@@ -25,6 +26,8 @@ public class MovieProvider extends ContentProvider {
     public static MovieDbHelper movieDbHelper;
 
     public static UriMatcher sUriMatcher = buildUriMatcher();
+
+    private static final String TAG = MovieProvider.class.getSimpleName();
 
     private static UriMatcher buildUriMatcher() {
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -116,6 +119,27 @@ public class MovieProvider extends ContentProvider {
 
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String s, @Nullable String[] strings) {
-        return 0;
+        int favoriteUpdated;
+        SQLiteDatabase sqLiteDatabase = movieDbHelper.getWritableDatabase();
+        int uriMatch = sUriMatcher.match(uri);
+        switch (uriMatch) {
+            case CODE_MOVIE_WITH_ID:
+                String selection = MovieContract.MovieEntry.KEY_COLUMN_MOVIE_ID + " = ? ";
+                String[] selectionArgs = new String[]{uri.getLastPathSegment()};
+                Log.d(TAG, "selection : " + selection);
+                Log.d(TAG, "selectionArgs : " + selectionArgs);
+                favoriteUpdated = sqLiteDatabase.update(MovieContract.MovieEntry.TABLE_NAME, contentValues, selection, selectionArgs);
+                Log.d(TAG, "favoriteUpdated : " + favoriteUpdated);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri : " + uri);
+        }
+
+                if (favoriteUpdated != 0) {
+                    //set notifications if a task was updated
+                    getContext().getContentResolver().notifyChange(uri, null);
+                }
+
+                return favoriteUpdated;
     }
 }

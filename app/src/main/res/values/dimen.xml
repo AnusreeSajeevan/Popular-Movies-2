@@ -5,12 +5,14 @@
     <dimen name="margin_10">10dp</dimen>
     <dimen name="margin_40">40dp</dimen>
 
+    <dimen name="linespace_3">3sp</dimen>
+
     <dimen name="rating_text_size">16sp</dimen>
     <dimen name="text_size_16">16sp</dimen>
     <dimen name="text_size_14">14sp</dimen>
     <dimen name="text_size_12">12sp</dimen>
     <dimen name="text_size_18">18sp</dimen>
-    <dimen name="author_text_size">14sp</dimen>
+    <dimen name="author_text_size">16sp</dimen>
     <dimen name="review_text_size">15sp</dimen>
 
     <dimen name="details_left_margin">160dp</dimen>
@@ -24,5 +26,8 @@
     <dimen name="list_padding">2dp</dimen>
     <dimen name="favorites_icon_size">15dp</dimen>
     <dimen name="details_favorites_icon_size">20dp</dimen>
+    <dimen name="trailer_height">200dp</dimen>
+    <dimen name="trailer_width">150dp</dimen>
+    <dimen name="detail_image_elevation">5dp</dimen>
 
 </resources>

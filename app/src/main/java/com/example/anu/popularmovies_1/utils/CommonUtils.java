@@ -1,5 +1,13 @@
 package com.example.anu.popularmovies_1.utils;
 
+import android.text.Html;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
+import android.view.View;
+import android.view.ViewTreeObserver;
+import android.widget.TextView;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -35,4 +43,5 @@ public class CommonUtils {
         return outputDate;
 
     }
+
 }

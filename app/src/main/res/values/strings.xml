@@ -33,6 +33,12 @@
 
     <string name="snackbar_message">No internet connection !!!\nShowing favorite movies</string>
 
-    <string name="review_count">%d reviews</string>
+    <plurals name="review_count">
+        <item quantity="zero">%d reviews</item>
+        <item quantity="one">%d review</item>
+        <item quantity="other">%d reviews</item>
+    </plurals>
+
     <string name="view_more">view moew</string>
+    <string name="reviews">Reviews</string>
 </resources>
